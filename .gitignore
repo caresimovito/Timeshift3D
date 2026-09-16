@@ -1,0 +1,23 @@
+# Unreal Engine generated/cache folders
+Binaries/
+Intermediate/
+DerivedDataCache/
+Saved/
+.vs/
+Build/
+
+# Visual Studio / Rider generated project files (regenerated from .uproject)
+*.sln
+*.slnx
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+
+# Scratch space for downloaded/generated assets before import (not part of the project)
+meshy/
+
+# OS files
+.DS_Store
+Thumbs.db
