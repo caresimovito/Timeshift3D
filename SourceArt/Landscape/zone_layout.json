@@ -1,0 +1,207 @@
+{
+ "zones": [
+  {
+   "name": "ArrivalPad",
+   "x0": -1000,
+   "x1": 1000,
+   "half_width": 1000,
+   "new": false
+  },
+  {
+   "name": "PathA",
+   "x0": 1000,
+   "x1": 13000,
+   "half_width": 500,
+   "new": false
+  },
+  {
+   "name": "GrazingMeadow",
+   "x0": 13000,
+   "x1": 25000,
+   "half_width": 1500,
+   "new": true
+  },
+  {
+   "name": "TarPit",
+   "x0": 25000,
+   "x1": 27300,
+   "half_width": 800,
+   "new": false
+  },
+  {
+   "name": "SwampMarsh",
+   "x0": 27300,
+   "x1": 37300,
+   "half_width": 1000,
+   "new": true
+  },
+  {
+   "name": "RaptorZone",
+   "x0": 37300,
+   "x1": 38900,
+   "half_width": 1000,
+   "new": false
+  },
+  {
+   "name": "NestingGrounds",
+   "x0": 38900,
+   "x1": 48900,
+   "half_width": 1500,
+   "new": true
+  },
+  {
+   "name": "RockfallZone",
+   "x0": 48900,
+   "x1": 51900,
+   "half_width": 900,
+   "new": false
+  },
+  {
+   "name": "CanyonPass",
+   "x0": 51900,
+   "x1": 63900,
+   "half_width": 400,
+   "new": true
+  },
+  {
+   "name": "RiverBankNear",
+   "x0": 63900,
+   "x1": 64700,
+   "half_width": 1000,
+   "new": false
+  },
+  {
+   "name": "RiverBankFar",
+   "x0": 64900,
+   "x1": 65900,
+   "half_width": 1000,
+   "new": false
+  },
+  {
+   "name": "AshForest",
+   "x0": 65900,
+   "x1": 77900,
+   "half_width": 1000,
+   "new": true
+  },
+  {
+   "name": "KeyArtifactPad",
+   "x0": 77900,
+   "x1": 79600,
+   "half_width": 900,
+   "new": false
+  },
+  {
+   "name": "LavaFields",
+   "x0": 79600,
+   "x1": 91600,
+   "half_width": 700,
+   "new": true
+  },
+  {
+   "name": "ApproachToArena",
+   "x0": 91600,
+   "x1": 94600,
+   "half_width": 700,
+   "new": false
+  },
+  {
+   "name": "BossArena",
+   "x0": 94600,
+   "x1": 97450,
+   "half_width": 1750,
+   "new": false
+  }
+ ],
+ "river_x": 64800,
+ "x_map_old_to_new": [
+  [
+   -1000000000.0,
+   1000,
+   null,
+   null
+  ],
+  [
+   1000,
+   2400,
+   1000,
+   13000
+  ],
+  [
+   2400,
+   4700,
+   25000,
+   27300
+  ],
+  [
+   4700,
+   6300,
+   37300,
+   38900
+  ],
+  [
+   6300,
+   7800,
+   48900,
+   51900
+  ],
+  [
+   7800,
+   8600,
+   63900,
+   64700
+  ],
+  [
+   8600,
+   8800,
+   64700,
+   64900
+  ],
+  [
+   8800,
+   9800,
+   64900,
+   65900
+  ],
+  [
+   9800,
+   11500,
+   77900,
+   79600
+  ],
+  [
+   11500,
+   12200,
+   91600,
+   94600
+  ],
+  [
+   12200,
+   15050,
+   94600,
+   97450
+  ],
+  [
+   15050,
+   1000000000.0,
+   null,
+   null
+  ]
+ ],
+ "landscape": {
+  "origin": [
+   -3000.0,
+   -12600.0
+  ],
+  "size_verts": [
+   2206,
+   505
+  ],
+  "quad_cm": 50.0,
+  "import_center": [
+   52125.0,
+   0.0,
+   0
+  ]
+ }
+}
