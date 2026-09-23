@@ -8,7 +8,7 @@ Pipeline per species:
   3. find landmarks from the mesh (feet, legs, spine centre line, neck, head, tail)
   4. build an armature (root > pelvis > spine/neck/head, tail chain, 2 or 4 legs, arms or wings)
   5. skin with automatic weights
-  6. key Idle / Walk / Run / Attack / Death actions (IK feet planted, then baked to FK)
+  6. key Idle / Walk / Run / Attack / Death / Hit actions (IK feet planted, then baked to FK)
   7. export SK_<name>.fbx with all actions
 """
 import bpy, bmesh, math
@@ -537,6 +537,18 @@ def animate(arm, lm, spec):
             for k, s in (('L', 1), ('R', -1)):
                 rot(pbs['wing_%s_upper' % k], (1, 0, 0), s * 50 * t)
         make_action(arm, 'Death', 40, fall, loop=False)
+
+        def flinch_air(arm, t, fr):
+            a = math.sin(math.pi * min(1.0, t * 1.15)) ** 0.7
+            shock = max(0.0, 1 - abs(t - 0.12) / 0.12)
+            rot(pbs['pelvis'], (0, 1, 0), -22 * a)
+            setloc(pbs['pelvis'], (-0.04 * L * a, 0, 0.02 * L * shock))
+            for k, s in (('L', 1), ('R', -1)):
+                rot(pbs['wing_%s_upper' % k], (1, 0, 0), s * 32 * a)
+                rot(pbs['wing_%s_lower' % k], (1, 0, 0), s * 18 * shock)
+            rot(pbs['head'], (0, 1, 0), -25 * a)
+            rot(pbs['head'], (0, 0, 1), 12 * shock)
+        make_action(arm, 'Hit', 14, flinch_air, loop=False)
         return
 
     sprawl = spec.get('sprawl', False)
@@ -585,6 +597,21 @@ def animate(arm, lm, spec):
             rot(b, (0, 0, 1), 6 * e)
     make_action(arm, 'Death', 40, death, loop=False)
 
+    def flinch(arm, t, fr):
+        # sharp recoil on impact, then settle back - about half a second
+        feet(0, 0, 0, 0.6, 'Walk')
+        a = math.sin(math.pi * min(1.0, t * 1.15)) ** 0.7
+        shock = max(0.0, 1 - abs(t - 0.12) / 0.12)
+        setloc(pbs['pelvis'], (-0.12 * hip_h * a, 0, -0.06 * hip_h * shock))
+        rot(pbs['spine_01'], (0, 1, 0), -13 * a)
+        rot(pbs['neck_01'], (0, 1, 0), -22 * a - 8 * shock)
+        rot(pbs['neck_01'], (0, 0, 1), 9 * shock)
+        rot(pbs['head'], (0, 1, 0), -16 * a)
+        rot(pbs['head'], (0, 0, 1), 12 * shock)
+        for i, b in enumerate(tail):
+            rot(b, (0, 0, 1), 11 * a * math.sin(1.2 * i + 1.5))
+    make_action(arm, 'Hit', 14, flinch, loop=False)
+
 
 def bake_actions(arm):
     select_only(arm)
@@ -625,7 +652,32 @@ def export(name, mesh, arm):
     return OUT + 'SK_%s.fbx' % name
 
 
-def build(name, do_export=True):
+def export_action(name, mesh, arm, action):
+    """Export one action on its own, for importing onto a skeleton Unreal already has."""
+    import os
+    os.makedirs(OUT, exist_ok=True)
+    act = bpy.data.actions.get(action)
+    if act is None:
+        raise Exception('no action %s' % action)
+    bpy.ops.object.select_all(action='DESELECT')
+    arm.select_set(True)                      # armature only: an animation-only FBX
+    bpy.context.view_layer.objects.active = arm
+    arm.animation_data.action = act
+    fr = act.frame_range
+    bpy.context.scene.frame_start = int(fr[0])
+    bpy.context.scene.frame_end = int(fr[1])          # just this action, not Blender's default 250
+    path = OUT + 'SK_%s_%s.fbx' % (name, action)
+    bpy.ops.export_scene.fbx(filepath=path, use_selection=True, global_scale=1.0,
+                             apply_unit_scale=True, apply_scale_options='FBX_SCALE_NONE',
+                             add_leaf_bones=False, use_armature_deform_only=True,
+                             object_types={'ARMATURE'},
+                             bake_anim=True, bake_anim_use_all_actions=False, bake_anim_use_nla_strips=False,
+                             bake_anim_force_startend_keying=True, bake_anim_simplify_factor=0.0,
+                             path_mode='COPY', embed_textures=False, mesh_smooth_type='FACE')
+    return path
+
+
+def build(name, do_export=True, only_action=None):
     spec = SPECIES[name]
     clear_scene()
     bpy.context.scene.render.fps = FPS
@@ -636,7 +688,10 @@ def build(name, do_export=True):
     setup_ik(arm)
     animate(arm, lm, spec)
     bake_actions(arm)
-    path = export(name, mesh, arm) if do_export else None
+    if only_action:
+        path = export_action(name, mesh, arm, only_action)
+    else:
+        path = export(name, mesh, arm) if do_export else None
     return dict(name=name, tris=sum(len(p.vertices) - 2 for p in mesh.data.polygons), cover=round(cover, 3),
                 bones=len(arm.data.bones), actions=[a.name for a in bpy.data.actions], path=path,
                 feet=sorted(lm['legs'].keys()), H=round(lm['H'], 2), L=round(lm['L'], 2))
