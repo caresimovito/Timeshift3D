@@ -21,3 +21,6 @@ meshy/
 # OS files
 .DS_Store
 Thumbs.db
+
+# scratch assets used by the heightmap import pipeline
+Content/Timeshift/Environment/Terrain/_Import/
