@@ -28,6 +28,7 @@ SPECIES = {
     'RiverAmbusher': dict(kind='quad',  length=9.0, tris=34000, head=0.17, chest=0.0, sprawl=True),
     'Brontosaurus':  dict(kind='quad',  length=20.0, tris=36000, head=0.05, chest=0.0),
     'Pterosaur':     dict(kind='ptero', length=6.0, tris=26000, head=0.22, chest=0.0),
+    'RexPrime':      dict(kind='biped', length=12.0, tris=40000, head=0.16, chest=0.46),
 }
 
 
