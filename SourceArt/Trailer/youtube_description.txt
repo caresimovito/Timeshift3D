@@ -1,0 +1,41 @@
+CHRONOSHIFT — Era One: The Prehistoric Age | First Level Trailer
+
+A time traveller is stranded a hundred million years before his own.
+
+Era One of sixteen.
+
+Era One drops you into the late Cretaceous with nothing. You survive with what you can cut,
+carve and sharpen — a spear, a bone club, a sling and a bola. Crouch in the ferns and the
+raptors lose you; stand up and they come. Cross the jungle, the swamp, the nesting grounds,
+the canyon pass, the ash forest and the lava fields to find the key artifact that opens the
+portal home. Rex Prime guards it, and wounding him only makes him faster.
+
+This is the first level, captured in-engine. The portal doesn't send you home -- it sends you
+somewhere else. Sixteen eras are planned; this is the first.
+
+— WHAT'S IN IT —
+
+• Nine distinct areas, from jungle canopy to a plain of cracked basalt with lava in the seams
+• Four primitive weapons, swapped on the fly
+• Crouch-based stealth that genuinely changes whether you're seen
+• Seven dinosaur species, each with their own animations and reactions
+• A two-phase boss who speeds up as he takes damage
+• Environmental hazards — lava, tar, volcanic vents
+
+— MADE WITH —
+
+Unreal Engine 5.8. Terrain sculpted from generated heightmaps, foliage placed with PCG,
+creatures modelled and rigged in Blender. All footage is rendered from the running game, not
+a cinematic mock-up.
+
+— CHAPTERS —
+
+0:00 Jungle, meadow and wetlands
+0:18 Nesting grounds and canyon
+0:33 Lava fields and the arena
+
+— CREDITS —
+
+Music: "The Battle of 1066" by Patrick Patrikios
+
+#indiegame #unrealengine #ue5 #gamedev #dinosaurs #indiedev #solodev
