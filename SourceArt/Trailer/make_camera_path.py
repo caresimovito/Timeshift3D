@@ -27,7 +27,9 @@ def ease(t):
 # (name, seconds, start xyz + above-ground height, end xyz, start pitch/yaw, end pitch/yaw)
 SHOTS = [
     # opens over the hero's shoulder at the player start, looking out into the era
-    ('hero',     6.0, (-150,  40, 152), ( -95,  25, 142), (-15, -15), (-19, -15), 11.4),
+    # the hero walks east out of the arrival grove at 500 cm/s; camera tracks 4.5 m behind.
+    # marked linear so the camera holds station instead of easing away from him.
+    ('walk',     8.0, (-450, 105, 205), (3550, 105, 195), (-5,  0), (-5,  0), 12.0, 'linear'),
     ('arrival',  5.0, (1200,  600, 220), (4200,  200, 200), (-4,  -8), (-2,  6), 12.2),
     ('meadow',   5.0, (13200, -900, 260), (16800, 400, 230), (-3, 14), (-5, -6), 11.4),
     ('pond',     4.5, (24600, 1400, 300), (27200, 300, 240), (-8, -22), (-4, 4), 11.4),
@@ -40,14 +42,17 @@ SHOTS = [
 ]
 
 import sys
-if len(sys.argv) > 1 and sys.argv[1] == 'hero-only':
-    SHOTS = [x for x in SHOTS if x[0] == 'hero']
+if len(sys.argv) > 1 and sys.argv[1] in ('hero-only', 'walk-only'):
+    SHOTS = [x for x in SHOTS if x[0] == 'walk']
 
 frames = []
-for name, secs, a, b, ra, rb, bias in SHOTS:
+for shot in SHOTS:
+    name, secs, a, b, ra, rb, bias = shot[:7]
+    linear = len(shot) > 7 and shot[7] == 'linear'
     n = int(secs * FPS)
     for k in range(n):
-        t = ease(k / max(1, n - 1))
+        u = k / max(1, n - 1)
+        t = u if linear else ease(u)
         x = a[0] + (b[0] - a[0]) * t
         y = a[1] + (b[1] - a[1]) * t
         above = a[2] + (b[2] - a[2]) * t
@@ -61,5 +66,5 @@ json.dump({'fps': FPS, 'frames': frames},
           open(r"C:/repos/Unreal Projects/Timeshift3D/Saved/trailer_path.json", "w"))
 print(f"shots   : {len(SHOTS)}")
 print(f"frames  : {len(frames)}  ({len(frames)/FPS:.1f} s at {FPS} fps)")
-for name, secs, *rest in SHOTS:
-    print(f"   {name:<10} {secs:>4.1f} s   exposure {rest[-1]}")
+for shot in SHOTS:
+    print(f"   {shot[0]:<10} {shot[1]:>4.1f} s" + ('   linear' if len(shot) > 7 else ''))
