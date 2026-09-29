@@ -24,3 +24,12 @@ Thumbs.db
 
 # scratch assets used by the heightmap import pipeline
 Content/Timeshift/Environment/Terrain/_Import/
+
+# Captures and renders. Screenshots/.gitkeep is tracked so the folder survives.
+Screenshots/*
+!Screenshots/.gitkeep
+*.mp4
+*.mov
+
+# Unreal writes this when you change the .uproject engine association
+*.uproject.bak
