@@ -85,6 +85,7 @@ LOOPS = set(["S_Creature_Footsteps_Gravel_Loop",
              "S_Pterosaur_Wings_Loop",
              "S_Amb_Jungle_Creatures_Loop",
              "S_Amb_Jungle_Pad_Loop", "S_Amb_Jungle_Dark_Loop",
+             "S_Fly_Wings_Loop",
              "S_Foot_Grass_Loop", "S_Foot_Gravel_Loop",
              "S_Foot_Mud_Loop_01", "S_Foot_Mud_Loop_02", "S_Foot_Sand_Loop",
              "S_Wpn_Torch_Burn_Loop_01", "S_Wpn_Torch_Burn_Loop_02"])
