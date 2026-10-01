@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Warn before a binary asset grows into GitHub's hard 100 MB per-file limit.
+# GitHub rejects any file over 100 MB, and because .uasset files are binary and
+# already in history, fixing it after the fact means rewriting history.
+# Enabled with: git config core.hooksPath .githooks
+root=$(git rev-parse --show-toplevel) || exit 0
+cd "$root" || exit 0
+
+big=$(git ls-files -z -- '*.uasset' '*.umap' '*.fbx' 2>/dev/null \
+      | xargs -0 ls -l 2>/dev/null | sort -k5 -rn | head -1)
+[ -z "$big" ] && exit 0
+bytes=$(echo "$big" | awk '{print $5}')
+name=$(echo "$big" | awk '{print $9}')
+mb=$(awk -v b="$bytes" 'BEGIN{printf "%.1f", b/1048576}')
+over=$(awk -v m="$mb" 'BEGIN{print (m>=98)?1:0}')
+warn=$(awk -v m="$mb" 'BEGIN{print (m>=80)?1:0}')
+
+if [ "$over" = "1" ]; then
+  echo ""
+  echo "  PUSH BLOCKED - ${mb} MB asset is at GitHub's 100 MB limit"
+  echo "  $name"
+  echo ""
+  echo "  GitHub will reject this push anyway. Options:"
+  echo "    - shrink the asset in Unreal (check texture compression / LODs), or"
+  echo "    - migrate to Git LFS:  git lfs migrate import --everything"
+  echo ""
+  echo "  To push anyway (it will probably fail):  git push --no-verify"
+  echo ""
+  exit 1
+fi
+
+if [ "$warn" = "1" ]; then
+  echo ""
+  echo "  WARNING: largest asset is ${mb} MB, GitHub's hard limit is 100 MB"
+  echo "  $name"
+  echo "  Migrating to Git LFS gets harder the longer you leave it."
+  echo ""
+fi
+exit 0
