@@ -165,3 +165,34 @@ Buttons take their art through `WidgetStyle.normal/hovered/pressed` rather than
   that receives a texture at runtime must be a `Border`, not an `Image`.
 - `LoadAssetBlocking` on an empty soft path aborts the node chain, so an entry
   with a blank `ThumbnailPath` silently kills the rest of its `Construct`.
+
+## Instrument ornaments
+
+`Tools/gen_ui_ornaments.py` generates the gears, clock faces and gauges that sit
+in the side margins. These are regular geometry — trapezoidal cog teeth, evenly
+spaced ticks, radial hands — so they are generated rather than painted. Each is
+drawn at 4x and downsampled, which is what gives the circles and tooth flanks
+clean edges, and each has a transparent background so it reads as a separate
+object over the frame.
+
+| Texture | px | Placed |
+|---|---|---|
+| `T_UI_DialTemporal` | 224 | left centre — cyan sweep gauge with a pointer |
+| `T_UI_GearMid` | 192 | left upper |
+| `T_UI_GearSmall` | 128 | left lower |
+| `T_UI_ClockSmall` | 160 | left top |
+| `T_UI_ClockFace` | 256 | right upper |
+| `T_UI_GearLarge` | 256 | right centre |
+| `T_UI_Medallion` | 128 | right lower — blank, a TextBlock sits on top |
+
+They live in an `Ornaments` CanvasPanel inside a root `Stage` Overlay, drawn at
+`ZOrder` 10 over the `Backdrop`, which is inset 124px left and right to leave
+them margin. Each uses a point anchor with `alignment` 0.5/0.5, so
+`offsets.left` is the position and `offsets.right`/`bottom` are the size.
+
+### Gotcha
+
+A CanvasPanel added to an Overlay defaults to `HAlign_Left` / `VAlign_Top`, so
+it collapses to its desired size and every anchored child resolves against that
+collapsed rect — they all pile up in the top-left corner. Set the canvas's
+overlay slot to Fill.
