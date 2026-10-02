@@ -1,5 +1,8 @@
 # Chronoshift — automated test pass, 2 Oct 2026
 
+> **Corrected after follow-up.** Two findings below were wrong on first pass and
+> are struck through in place. See `## Corrections` at the end.
+
 ## Scope and limits
 
 **This is not a human play test.** Synthetic input is rejected in my environment,
@@ -89,3 +92,49 @@ Nothing below was exercised, because all of it requires input:
 
 Discovery was only observed for species adjacent to the player start, since the
 character never moved.
+
+
+---
+
+## Corrections
+
+I re-ran the census properly, by reading `Species` off every loaded
+`BP_EnemyBase` actor in the editor rather than scanning strings out of binary
+packages. Two of the three bugs above were misdiagnosed.
+
+### Bug 1 — cause was wrong, symptom was real
+
+The flyers are **not** missing `Species`. All 97 enemies have one, with zero
+blanks. The five Pteranodon and six Tupandactylus actors carry `Pteranodon` and
+`Tupandactylus` correctly — there was simply **no bestiary entry by those
+names**, so `RecordDiscovery` still failed its asset load and they could never
+be logged. My original scan only looked for species tokens matching an existing
+entry, so "no species token" meant "no matching entry", and I reported it as
+"no Species set".
+
+**Fixed**: added `DA_Bestiary_Pteranodon` and `DA_Bestiary_Tupandactylus`, with
+portraits captured from `SK_Pteranodon` and `SK_Tupandactylus`. No actor edits
+were needed.
+
+### Bug 3 — false positive, withdrawn
+
+There are **no species/label mismatches**. The 15 placed species are all
+sensible and all now have entries. The apparent `Enemy_Raptor_* → Triceratops`
+style mismatches were strings picked up from asset references inside the binary
+packages, not `Species` values. This is exactly the failure mode I flagged as
+"lower confidence" — the lesson is that the binary scan is not evidence, and the
+editor census is.
+
+### Bug 2 — stands, with updated numbers
+
+20 entries now exist and **15 are obtainable**. Five have no placed actors:
+
+| Species | Situation |
+|---|---|
+| `RexPrime` | boss is placed but derives from `StaticMeshActor`, not `BP_EnemyBase`, so the discovery scan never sees it |
+| `Dimorphodon` | no actors in the level |
+| `Brontosaurus` | scenery meshes only |
+| `Pterosaur` | superseded in the level by Pteranodon/Tupandactylus |
+| `Palaeophis` | intentional — Eocene, a later era |
+
+The counter reads "N OF 20" but tops out at 15.
