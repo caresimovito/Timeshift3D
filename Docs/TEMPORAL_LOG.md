@@ -196,3 +196,32 @@ A CanvasPanel added to an Overlay defaults to `HAlign_Left` / `VAlign_Top`, so
 it collapses to its desired size and every anchored child resolves against that
 collapsed rect — they all pile up in the top-left corner. Set the canvas's
 overlay slot to Fill.
+
+## Discovery state
+
+Discovery lives in a save file, not in the entry assets. `BP_ChronoshiftSave`
+(parent `SaveGame`) holds `DiscoveredIds`, an array of species ids, written to
+the slot `ChronoshiftSave`.
+
+`RecordDiscovery` on the player character keeps its own `DiscoveredIds` array,
+lazily seeded from the slot on first run via a `DiscoveryLoaded` latch. When a
+new species comes within 2500 units it adds the id, writes a fresh save object
+to the slot, and prints the toast.
+
+The Temporal Log loads the slot once per rebuild and sets each row's
+`IsDiscovered` from it. `WBP_BestiaryListRow` no longer reads the entry asset at
+all for lock state; it gates both its `Construct` styling and its `OnClicked` on
+that flag.
+
+### Why it is shaped this way
+
+- `BP_BestiaryEntry.Discovered` still exists but is **dead** - nothing reads it.
+  It was the original mechanism, and it was wrong: it wrote player progress into
+  shipped reference data, so discoveries dirtied tracked `.uasset` files, were
+  lost whenever the editor closed without a save, and could never persist at all
+  in a packaged build.
+- The character keeps its own copy of the array because Blueprint cannot mutate
+  another object's array in place - a Get on an object's array variable yields a
+  copy. Writing the whole array onto a fresh save object avoids that trap.
+- `Tools/make_savegame.py` exists because the MCP toolset can edit blueprints but
+  cannot create them; it is safe to re-run and does nothing if the asset exists.
