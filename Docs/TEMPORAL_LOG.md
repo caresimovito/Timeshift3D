@@ -123,3 +123,45 @@ moves it off, though it does not move it far.'
 
 Encountered in the warm shallow channels and flooded mangrove margins of the Eocene
 coastal shelf, and in the drowned river mouths that feed it.
+
+---
+
+## Frame art
+
+The ornate chrome is generated, not painted: `Tools/gen_ui_frames.py` writes ten
+9-slice PNGs to `SourceArt/UI/`, and `Tools/import_ui_frames.py` imports them to
+`/Game/Timeshift/UI/Frames/` and binds them to the panels. Both are idempotent,
+so iterating on the look means editing the colour ramp or the band profile in the
+generator and re-running the pair.
+
+Each texture is authored at the pixel size it renders at: the brass band is a
+fixed number of pixels and the slice margin sits just outside it, so Slate
+stretches only the flat centre and the frame stays crisp at any panel size.
+Corner ornaments fit entirely inside the margin square or 9-slicing would cut
+them in half.
+
+| Texture | px | Margin | Used by |
+|---|---|---|---|
+| `T_UI_FrameOuter` | 72 | 0.389 | `Backdrop` — heavy band, corner brackets |
+| `T_UI_PanelDark` | 40 | 0.400 | `LeftPanel` — rosette corners |
+| `T_UI_PanelAnalyzer` | 40 | 0.400 | `AnalyzerBox` — cyan inner glow |
+| `T_UI_PanelParchment` | 40 | 0.400 | `RecordBox` — parchment + keyline |
+| `T_UI_MetaBar` | 24 | 0.417 | `MetaBar`, `FooterBar`, `IndexContextBox` |
+| `T_UI_RowIdle` | 24 | 0.417 | `RowButton` normal |
+| `T_UI_RowSelected` | 24 | 0.417 | `RowButton` hovered, `EraMarkerBox` |
+| `T_UI_TabActive` | 40 | 0.400 | `TabEnemies` |
+| `T_UI_TabIdle` | 40 | 0.400 | `TabBuildings`, `TabFacts` |
+| `T_UI_Rail` | 32 | 0.375 | `TimelineRail` — recessed channel |
+
+Buttons take their art through `WidgetStyle.normal/hovered/pressed` rather than
+`Background`, and their `BackgroundColor` must stay white or it tints the brush.
+
+### Gotchas
+
+- A `SlateBrush` with `drawAs: RoundedBox` defaults to
+  `roundingType: HalfHeightRadius`, which rounds each panel by half its own
+  height — panels become ellipses. Use `FixedRadius`, or `Box` with a texture.
+- `Appearance|SetBrushFromTexture` resolves to the Border overload, so any widget
+  that receives a texture at runtime must be a `Border`, not an `Image`.
+- `LoadAssetBlocking` on an empty soft path aborts the node chain, so an entry
+  with a blank `ThumbnailPath` silently kills the rest of its `Construct`.
