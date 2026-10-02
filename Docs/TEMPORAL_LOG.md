@@ -225,3 +225,32 @@ that flag.
   copy. Writing the whole array onto a fresh save object avoids that trap.
 - `Tools/make_savegame.py` exists because the MCP toolset can edit blueprints but
   cannot create them; it is safe to re-run and does nothing if the asset exists.
+
+## Discovering the boss
+
+`BP_Boss_RexPrime` is **not** a `BP_EnemyBase` subclass — both derive straight
+from `StaticMeshActor`, and the boss has its own 24 variables and 11 functions
+(phase transitions, stomp, enrage, arena leashing), several of which collide by
+name with `BP_EnemyBase` (`SnapToGround`, `HealthComponent`, `VaryHurtReaction`).
+Reparenting it would be destructive, so `RecordDiscovery` runs a second
+`GetAllActorsOfClass` over `BP_Boss_RexPrime` instead. The boss carries its own
+`Species` string, defaulting to `RexPrime`.
+
+Any future boss that should appear in the log needs the same treatment: a
+`Species` matching its entry id, and a scan pass in `RecordDiscovery`.
+
+### Editor gotcha that cost an afternoon
+
+**Never compile `BP_ThirdPersonCharacter` while a PIE session is running.** It
+does not error, the blueprint still reports a clean compile, and the graphs read
+back intact — but `EventTick` silently stops firing on the player pawn **for the
+rest of the editor session**, which kills everything downstream of it:
+footsteps, torch audio, zoom, `UnstickFromEnemy` and `RecordDiscovery`.
+
+It looks exactly like a logic bug in whatever you just changed, and it is not.
+Restarting the editor restores it. If Tick-driven behaviour dies after an edit,
+check for this before debugging the code: drop an unconditional `PrintString` at
+the top of a Tick-driven function, and if it never appears, the chain is dead
+rather than the logic wrong.
+
+Always `StopPIE` before compiling.
