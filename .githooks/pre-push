@@ -6,6 +6,13 @@
 root=$(git rev-parse --show-toplevel) || exit 0
 cd "$root" || exit 0
 
+# Git LFS upload. core.hooksPath points here, so LFS cannot install its own
+# hook into .git/hooks - it has to be invoked explicitly or pushes will send
+# pointer files without the data behind them.
+if command -v git-lfs >/dev/null 2>&1; then
+  git lfs pre-push "$@" || exit $?
+fi
+
 big=$(git ls-files -z -- '*.uasset' '*.umap' '*.fbx' 2>/dev/null \
       | xargs -0 ls -l 2>/dev/null | sort -k5 -rn | head -1)
 [ -z "$big" ] && exit 0
@@ -33,7 +40,8 @@ if [ "$warn" = "1" ]; then
   echo ""
   echo "  WARNING: largest asset is ${mb} MB, GitHub's hard limit is 100 MB"
   echo "  $name"
-  echo "  Migrating to Git LFS gets harder the longer you leave it."
+  echo "  LFS tracking is on, so new versions of this file go to LFS."
+  echo "  Existing history still holds it as a plain blob."
   echo ""
 fi
 exit 0

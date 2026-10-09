@@ -1,0 +1,14 @@
+# Unreal binary assets. Every re-save of a .uasset stores a whole new copy in
+# git, which is how .git reached 6.2 GB, and GitHub rejects any single file
+# over 100 MB - SM_BG_JungleTreeline.uasset is already at 87.5 MB.
+#
+# Tracking from here forward: assets stay as ordinary blobs in existing
+# history, and every version committed from now on goes to LFS instead. No
+# history rewrite, so no force-push and nobody has to re-clone.
+*.uasset filter=lfs diff=lfs merge=lfs -text
+*.umap   filter=lfs diff=lfs merge=lfs -text
+
+# Large binary source art, same reasoning
+*.fbx    filter=lfs diff=lfs merge=lfs -text
+*.wav    filter=lfs diff=lfs merge=lfs -text
+*.psd    filter=lfs diff=lfs merge=lfs -text
