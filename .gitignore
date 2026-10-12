@@ -33,3 +33,7 @@ Screenshots/*
 
 # Unreal writes this when you change the .uproject engine association
 *.uproject.bak
+
+# Blender's rolling backup copies - the .blend itself is tracked
+*.blend1
+*.blend2
