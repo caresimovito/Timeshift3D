@@ -219,8 +219,10 @@ def locomotion(name, T, VEL, DUTY, LIFT, CROUCH, BOB, PITCH, META, NECK, TAILAMP
                 clip.stats["slide"][s].append(bx)
         rot["spine_01"] = (0, math.radians(1.8) * side, math.radians(1.5) * side)
         rot["spine_03"] = (-pitch * 0.5, 0, 0)
-        rot["neck_01"] = (-pitch * 0.8 + NECK, 0, -math.radians(1.6) * side)
-        rot["head"] = (math.radians(1.5) * math.sin(2 * math.pi * 2 * (u - 0.2)), 0, 0)
+        look = math.radians(5.0) * math.sin(2 * math.pi * 0.5 * u + 0.6)          # slow look across the 2-cycle span
+        rot["neck_01"] = (-pitch * 0.8 + NECK + math.radians(2.0) * math.sin(2 * math.pi * 2 * (u - 0.15)), 0, -math.radians(3.0) * side + look * 0.5)
+        rot["neck_02"] = (math.radians(1.5) * math.sin(2 * math.pi * 2 * (u - 0.22)), 0, -math.radians(2.0) * side + look * 0.3)
+        rot["head"] = (math.radians(3.0) * math.sin(2 * math.pi * 2 * (u - 0.3)), math.radians(2.0) * side, look * 0.2)
         rot["jaw"] = (JAW_CLOSED + 0.02 * math.sin(2 * math.pi * 2 * u), 0, 0)
         for i, amp in enumerate(TAILAMP):
             lag = 0.06 * (i + 1)
@@ -288,7 +290,7 @@ def make_idle():
     w = lambda a, ph=0.0, cyc=1: [(i / 30.0 * T, a * math.sin(2 * math.pi * (cyc * i / 30.0 + ph))) for i in range(31)]
     planted_clip("Rex4_Idle", T, {
         ("spine_01", 0): w(0.015), ("spine_03", 0): w(-0.02, 0.1), ("neck_01", 0): w(0.03, 0.2),
-        ("neck_01", 2): w(0.06, 0.0), ("head", 2): w(0.05, 0.15), ("head", 0): w(0.02, 0.3, 2),
+        ("neck_01", 2): w(0.12, 0.0), ("neck_02", 2): w(0.08, 0.08), ("head", 2): w(0.10, 0.15), ("head", 0): w(0.04, 0.3, 2), ("head", 1): w(0.05, 0.4),
         ("jaw", 0): [(t, JAW_CLOSED + 0.03 + 0.03 * math.sin(2 * math.pi * t / T)) for t in [i * T / 30 for i in range(31)]],
         ("tail_02", 2): w(0.04, 0.1), ("tail_03", 2): w(0.05, 0.2), ("tail_04", 2): w(0.06, 0.3), ("tail_05", 2): w(0.07, 0.4),
         ("tail_02", 0): w(0.01, 0.2), ("upperarm_l", 0): w(0.05, 0.1), ("upperarm_r", 0): w(-0.05, 0.6),
@@ -365,7 +367,102 @@ def make_death():
         plant_until=1.9)
 
 
-ALL = {"Idle": make_idle, "Walk": make_walk, "Run": make_run, "Roar": make_roar, "Bite": make_bite, "Hit": make_hit, "Death": make_death}
+def neck(chans, axis, keys, split=(0.40, 0.35, 0.25)):
+    """Spread a head turn (axis 0 pitch +down, 2 yaw +right) over neck_01/neck_02/head."""
+    for b, w in zip(("neck_01", "neck_02", "head"), split):
+        k = (b, axis)
+        new = [(t, v * w) for t, v in keys]
+        if k in chans:
+            old = chans[k]
+            ts = sorted(set([t for t, _ in old] + [t for t, _ in new]))
+            chans[k] = [(t, track(old, t) + track(new, t)) for t in ts]
+        else:
+            chans[k] = new
+
+
+def osc(t0, t1, amp, hz, decay=True, phase=0.0):
+    n = int((t1 - t0) * hz * 4) + 1
+    out = []
+    for i in range(n + 1):
+        t = t0 + (t1 - t0) * i / n
+        a = amp * ((1 - (t - t0) / (t1 - t0)) if decay else 1.0)
+        out.append((t, a * math.sin(2 * math.pi * hz * (t - t0) + phase)))
+    return out
+
+
+def make_idle_look():
+    c = {}
+    neck(c, 2, [(0, 0), (0.6, 0), (1.4, -0.55), (2.1, -0.55), (2.9, 0.50), (3.6, 0.50), (4.4, 0), (4.8, 0)])
+    neck(c, 0, [(0, 0), (1.4, -0.08), (1.6, 0.06), (1.75, -0.04), (1.9, 0.05), (2.1, -0.06), (2.9, -0.10), (3.6, -0.05), (4.8, 0)])
+    c[("jaw", 0)] = [(0, JAW_CLOSED), (1.6, JAW_CLOSED + 0.06), (1.8, JAW_CLOSED), (3.2, JAW_CLOSED + 0.05), (4.8, JAW_CLOSED)]
+    c[("head", 1)] = [(0, 0), (1.4, 0.08), (2.1, 0.10), (2.9, -0.08), (3.6, -0.10), (4.8, 0)]
+    c[("spine_03", 2)] = [(0, 0), (1.4, -0.06), (2.9, 0.06), (4.8, 0)]
+    c[("tail_03", 2)] = [(0, 0), (1.6, 0.06), (3.1, -0.06), (4.8, 0)]
+    c[("tail_05", 2)] = [(0, 0), (1.8, 0.10), (3.3, -0.10), (4.8, 0)]
+    planted_clip("Rex4_IdleLook", 4.8, c, ploc_keys={2: [(0, -0.05), (2.4, -0.08), (4.8, -0.05)]})
+
+
+def make_idle_shake():
+    c = {}
+    neck(c, 0, [(0, 0), (0.4, -0.15), (0.6, 0.05), (2.2, 0.02), (2.6, 0)])
+    neck(c, 2, [(0, 0), (0.6, 0)] + osc(0.6, 2.1, 0.30, 4.0) + [(2.6, 0)], split=(0.25, 0.35, 0.40))
+    c[("head", 1)] = [(0, 0), (0.6, 0)] + osc(0.6, 2.1, 0.18, 4.0, phase=0.8) + [(2.6, 0)]
+    c[("jaw", 0)] = [(0, JAW_CLOSED), (0.5, 0.05), (0.7, JAW_CLOSED), (1.4, -0.05), (2.6, JAW_CLOSED)]
+    c[("spine_03", 2)] = [(0, 0), (0.6, 0)] + osc(0.6, 2.1, 0.04, 4.0, phase=2.5) + [(2.6, 0)]
+    c[("tail_04", 2)] = [(0, 0), (0.8, 0)] + osc(0.8, 2.4, 0.08, 2.0) + [(2.6, 0)]
+    planted_clip("Rex4_IdleShake", 2.6, c)
+
+
+def make_alert():
+    c = {}
+    neck(c, 0, [(0, 0), (0.25, -0.40), (0.9, -0.32), (1.6, -0.30), (2.2, 0)])
+    neck(c, 2, [(0, 0), (0.25, 0), (0.45, 0.35), (0.75, 0.35), (0.95, -0.40), (1.3, -0.40), (1.55, 0.05), (2.2, 0)])
+    c[("head", 0)] = [(0, 0), (0.25, -0.10), (0.5, 0.05), (0.6, -0.06), (0.7, 0.05), (2.2, 0)]
+    c[("jaw", 0)] = [(0, JAW_CLOSED), (0.25, 0.05), (0.5, JAW_CLOSED + 0.06), (1.4, 0.10), (1.7, JAW_CLOSED), (2.2, JAW_CLOSED)]
+    c[("spine_03", 0)] = [(0, 0), (0.25, -0.08), (1.6, -0.06), (2.2, 0)]
+    c[("tail_02", 0)] = [(0, 0), (0.25, 0.05), (2.2, 0)]
+    c[("tail_04", 2)] = [(0, 0), (0.5, -0.10), (1.0, 0.12), (1.5, -0.06), (2.2, 0)]
+    planted_clip("Rex4_Alert", 2.2, c, ploc_keys={0: [(0, 0), (0.25, -0.15), (1.6, -0.10), (2.2, 0)], 2: [(0, 0), (0.25, 0.04), (2.2, 0)]})
+
+
+def make_taunt():
+    c = {}
+    neck(c, 0, [(0, 0), (0.5, 0.45), (0.9, 0.40), (1.2, -0.45), (1.9, -0.40), (2.4, 0.10), (2.8, 0)])
+    neck(c, 2, [(0, 0), (0.5, 0.10), (0.9, -0.10), (1.2, 0)] + osc(1.25, 2.0, 0.18, 3.0) + [(2.8, 0)])
+    c[("jaw", 0)] = [(0, JAW_CLOSED), (0.5, JAW_CLOSED), (0.6, 0.15), (0.7, JAW_CLOSED), (0.8, 0.15), (0.9, JAW_CLOSED),
+                     (1.2, 0.48), (1.9, 0.44), (2.3, JAW_CLOSED), (2.8, JAW_CLOSED)]
+    c[("spine_03", 0)] = [(0, 0), (0.5, 0.10), (1.2, -0.08), (1.9, -0.06), (2.8, 0)]
+    c[("pelvis", 0)] = [(0, 0), (0.5, 0.05), (1.2, -0.04), (2.8, 0)]
+    c[("tail_02", 0)] = [(0, 0), (0.5, -0.06), (1.2, 0.06), (2.8, 0)]
+    c[("tail_05", 2)] = [(0, 0), (1.2, 0)] + osc(1.2, 2.4, 0.15, 1.5) + [(2.8, 0)]
+    planted_clip("Rex4_Taunt", 2.8, c, ploc_keys={2: [(0, 0), (0.5, -0.20), (1.2, 0.0), (2.8, 0)]})
+
+
+def make_head_swing():
+    c = {}
+    neck(c, 2, [(0, 0), (0.35, -0.55), (0.70, 0.50), (0.85, 0.45), (1.4, 0)])
+    neck(c, 0, [(0, 0), (0.35, -0.12), (0.62, 0.22), (0.85, 0.18), (1.4, 0)])
+    c[("head", 1)] = [(0, 0), (0.35, -0.15), (0.70, 0.20), (1.4, 0)]
+    c[("jaw", 0)] = [(0, JAW_CLOSED), (0.35, 0.40), (0.62, 0.45), (0.72, JAW_CLOSED - 0.02), (1.4, JAW_CLOSED)]
+    c[("spine_03", 2)] = [(0, 0), (0.35, -0.12), (0.70, 0.14), (1.4, 0)]
+    c[("spine_01", 2)] = [(0, 0), (0.35, -0.05), (0.70, 0.06), (1.4, 0)]
+    c[("tail_03", 2)] = [(0, 0), (0.40, 0.12), (0.75, -0.15), (1.4, 0)]
+    c[("tail_05", 2)] = [(0, 0), (0.45, 0.18), (0.80, -0.22), (1.4, 0)]
+    planted_clip("Rex4_HeadSwing", 1.4, c, ploc_keys={0: [(0, 0), (0.35, -0.20), (0.70, 0.50), (1.4, 0)], 2: [(0, 0), (0.70, -0.20), (1.4, 0)]})
+
+
+def make_hit_head():
+    c = {}
+    neck(c, 2, [(0, 0), (0.10, 0.50), (0.30, 0.30), (0.55, -0.08), (0.9, 0)], split=(0.30, 0.35, 0.35))
+    neck(c, 0, [(0, 0), (0.10, -0.25), (0.35, -0.05), (0.9, 0)])
+    c[("head", 1)] = [(0, 0), (0.10, 0.25), (0.4, 0.05), (0.9, 0)]
+    c[("jaw", 0)] = [(0, JAW_CLOSED), (0.10, 0.25), (0.45, JAW_CLOSED), (0.9, JAW_CLOSED)]
+    c[("spine_03", 2)] = [(0, 0), (0.12, 0.10), (0.9, 0)]
+    c[("tail_04", 2)] = [(0, 0), (0.2, -0.15), (0.55, 0.06), (0.9, 0)]
+    planted_clip("Rex4_HitHead", 0.9, c, ploc_keys={0: [(0, 0), (0.12, -0.15), (0.9, 0)]})
+
+
+ALL = {"IdleLook": make_idle_look, "IdleShake": make_idle_shake, "Alert": make_alert, "Taunt": make_taunt, "HeadSwing": make_head_swing, "HitHead": make_hit_head, "Idle": make_idle, "Walk": make_walk, "Run": make_run, "Roar": make_roar, "Bite": make_bite, "Hit": make_hit, "Death": make_death}
 want = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else list(ALL)
 for k in want:
     GUESS["l"] = [0.0, 0.0, 0.0]; GUESS["r"] = [0.0, 0.0, 0.0]
