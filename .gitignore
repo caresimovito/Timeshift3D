@@ -37,3 +37,7 @@ Screenshots/*
 # Blender's rolling backup copies - the .blend itself is tracked
 *.blend1
 *.blend2
+
+# Raw third-party downloads and their regenerable prep output (re-download / re-run prep scripts)
+SourceArt/Environment/Arena/dl_*/
+SourceArt/Environment/Arena/prep/

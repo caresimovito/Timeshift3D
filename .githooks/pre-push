@@ -13,8 +13,10 @@ if command -v git-lfs >/dev/null 2>&1; then
   git lfs pre-push "$@" || exit $?
 fi
 
-big=$(git ls-files -z -- '*.uasset' '*.umap' '*.fbx' 2>/dev/null \
-      | xargs -0 ls -l 2>/dev/null | sort -k5 -rn | head -1)
+# Files stored in LFS are exempt (LFS allows up to 2 GB); only plain blobs hit the 100 MB wall.
+lfs=$(git lfs ls-files -n 2>/dev/null | sort)
+big=$(git ls-files -- '*.uasset' '*.umap' '*.fbx' 2>/dev/null | sort | comm -23 - <(echo "$lfs") \
+      | tr '\n' '\0' | xargs -0 ls -l 2>/dev/null | sort -k5 -rn | head -1)
 [ -z "$big" ] && exit 0
 bytes=$(echo "$big" | awk '{print $5}')
 name=$(echo "$big" | awk '{print $9}')
