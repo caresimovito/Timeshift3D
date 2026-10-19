@@ -1,0 +1,5 @@
+(fn EndBurst ()
+  (Variables|Default|SetPhase 0)
+  (Utilities|Time|ClearTimerbyFunctionName :Object self :FunctionName "BurstTick")
+  (Components|Activation|Deactivate (Variables|Default|GetSteam))
+  (CallFunction|ScheduleNext self))

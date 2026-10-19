@@ -1,0 +1,15 @@
+(fn HitActor (A)
+  ; during a burst: scald (damage) anything with health, and throw the hero up and out of the column (1 s cooldown)
+  (bind now (Utilities|Time|GetGameTimeinSeconds))
+  (if (and (== (Variables|Default|GetPhase) 2) (> now (+ (Variables|Default|GetLastHitTime) 1.0)))
+    (bind hc (Utilities|Casting|CastToBP_HealthComponent :Object (Actor|GetComponentbyClass A "/Game/Timeshift/Components/BP_HealthComponent.BP_HealthComponent_C"))
+      (:then
+        (Variables|Default|SetLastHitTime now)
+        (Class|BPHealthComponent|ApplyDamage hc (Variables|Default|GetDamage))
+        (bind pc (Utilities|Casting|CastToBP_ThirdPersonCharacter :Object A)
+          (:then
+            (bind away (Math|Vector|Normalize (Math|Vector|MakeVector (- (.x (Transformation|GetActorLocation A)) (.x (Transformation|GetActorLocation self))) (- (.y (Transformation|GetActorLocation A)) (.y (Transformation|GetActorLocation self))) 0.0)))
+            (Character|LaunchCharacter pc (Math|Vector|MakeVector (* (.x away) 750.0) (* (.y away) 750.0) (Variables|Default|GetLaunchZ)) true true)
+            (Development|PrintString "Scalded by the geyser!" true true "(R=1.000000,G=0.850000,B=0.600000,A=1.000000)" 1.2))
+          (:CastFailed)))
+      (:CastFailed))))
