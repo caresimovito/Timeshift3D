@@ -1,0 +1,23 @@
+(fn UpdateSinking ()
+  ; mud / tar: standing still sinks the hero (any movement, even crawling at full sink, counts as struggling), moving struggles him back up, jumping pops him out; deep = damage
+  (bind mesh (Variables|Character|GetMesh))
+  (if (not (Variables|Default|GetMeshBaseSet))
+    (Variables|Default|SetMeshBaseZ (.z (Class|SceneComponent|GetRelativeLocation mesh)))
+    (Variables|Default|SetMeshBaseSet true))
+  (bind rate (Variables|Default|GetSinkRate))
+  (bind spd (Math|Vector|VectorLengthXY (Transformation|GetVelocity self)))
+  (bind falling (Movement|IsFalling (Variables|Character|GetCharacterMovement)))
+  (bind sink (Variables|Default|GetSink))
+  ; step by real elapsed game time so the rate holds whatever the caller's tick/timer rate is
+  (bind now (Utilities|Time|GetGameTimeinSeconds))
+  (bind dt (Math|Float|Clamp(Float) (- now (Variables|Default|GetLastSinkTime)) 0.0 0.25))
+  (bind stepped (select (> rate 0.0) (+ sink (* dt (select (< spd 10.0) rate (* -1.5 rate)))) (- sink (* 3.0 dt))))
+  (Variables|Default|SetSink (Math|Float|Clamp(Float) (select falling 0.0 stepped) 0.0 1.0))
+  ; only after SetSink: dt is a pure expression and is re-evaluated where it is used
+  (Variables|Default|SetLastSinkTime now)
+  (bind rel (Class|SceneComponent|GetRelativeLocation mesh))
+  (Transformation|SetRelativeLocation mesh (Math|Vector|MakeVector (.x rel) (.y rel) (- (Variables|Default|GetMeshBaseZ) (* (Variables|Default|GetSink) (Variables|Default|GetSinkDepth)))))
+  (if (and (> (Variables|Default|GetSink) 0.8) (> now (Variables|Default|GetNextSinkDamageTime)))
+    (Variables|Default|SetNextSinkDamageTime (+ now 0.5))
+    (Class|BPHealthComponent|ApplyDamage (Variables|Default|GetHealthComponent) (Variables|Default|GetSinkDamage))
+    (Development|PrintString "You're sinking - keep moving or jump!" true true "(R=1.000000,G=0.550000,B=0.200000,A=1.000000)" 0.6)))

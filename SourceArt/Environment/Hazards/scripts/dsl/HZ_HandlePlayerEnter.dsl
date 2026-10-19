@@ -1,0 +1,10 @@
+(fn HandlePlayerEnter (OtherActor)
+  (bind pc (Utilities|Casting|CastToBP_ThirdPersonCharacter :Object OtherActor)
+    (:then
+      (Variables|Default|SetOverlappingPlayer pc)
+      (Variables|Default|SetPlayerInside true)
+      (if (not (Variables|Default|GetIsPeriodicBurst))
+        ; slow via the hero's shared hazard multiplier (UpdateWading owns MaxWalkSpeed)
+        (Class|BPThirdPersonCharacter|SetHazardSpeed :self pc :Mult (Variables|Default|GetSpeedMultiplier))
+        (Utilities|Time|SetTimerbyFunctionName self "ApplyContinuousDamage" (Variables|Default|GetTickInterval) true)))
+    (:CastFailed)))
