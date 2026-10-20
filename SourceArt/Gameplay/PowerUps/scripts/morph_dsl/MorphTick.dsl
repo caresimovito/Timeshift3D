@@ -4,15 +4,24 @@
   (if (or (or (<= (Variables|Default|GetBuffLeft) 0.0) (<= (Class|BPHealthComponent|GetArmour hc) 0.0)) (Class|BPHealthComponent|GetIsDead hc))
     (CallFunction|EndMorph self)
     (return))
+  ; keep the torch hidden the whole time: lighting / stowing it (Z) or it burning out re-shows it (seen 2026-10-20)
+  (CallFunction|SetTorchHiddenForMorph self true)
   (Development|PrintString :InString (Utilities|String|Append (Utilities|String|Append (Variables|Default|GetMorphName) "   ") (Utilities|String|ToString(Integer) (Math|Float|Ceil (Variables|Default|GetBuffLeft)))) :bPrintToScreen true :bPrintToLog false :TextColor "(R=1.000000,G=0.650000,B=0.100000,A=1.000000)" :Duration 0.2 :Key "Morph")
   ; animation: the attack clip when the normal attack starts (LMB -> PerformAttack does the damage with the morph's
   ; AttackDamage and AttackRange); otherwise idle / walk / run by ground speed
   (bind mb (Variables|Default|GetMorphBody))
   (bind atk (Variables|Default|GetIsAttacking))
   (if (and atk (not (Variables|Default|GetMorphWasAttacking)))
-    (Components|Animation|PlayAnimation :self mb :NewAnimToPlay (Variables|Default|GetMorphAttack) :bLooping false)
+    ; a random move from this species' set (0 = its original bite, 1-2 = authored moves); roll ONCE into a variable
+    (Variables|Default|SetMorphAtkPick (Math|Random|RandomIntegerinRange 0 (- (Variables|Default|GetMorphAtkCount) 1)))
+    (if (== (Variables|Default|GetMorphAtkPick) 1)
+      (Components|Animation|PlayAnimation :self mb :NewAnimToPlay (Variables|Default|GetMorphAtk2) :bLooping false)
+      (elif (== (Variables|Default|GetMorphAtkPick) 2)
+        (Components|Animation|PlayAnimation :self mb :NewAnimToPlay (Variables|Default|GetMorphAtk3) :bLooping false)
+        (else
+          (Components|Animation|PlayAnimation :self mb :NewAnimToPlay (Variables|Default|GetMorphAttack) :bLooping false))))
     (Variables|Default|SetMorphAnimState 2)
-    (Variables|Default|SetMorphAttackEnd (+ (Utilities|Time|GetGameTimeinSeconds) 0.9)))
+    (Variables|Default|SetMorphAttackEnd (+ (Utilities|Time|GetGameTimeinSeconds) (select (== (Variables|Default|GetMorphAtkPick) 0) 0.9 1.05))))
   (Variables|Default|SetMorphWasAttacking atk)
   (if (> (Utilities|Time|GetGameTimeinSeconds) (Variables|Default|GetMorphAttackEnd))
     (bind spd (Math|Vector|VectorLengthXY (Transformation|GetVelocity self)))

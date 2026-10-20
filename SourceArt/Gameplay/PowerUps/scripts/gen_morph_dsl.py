@@ -5,6 +5,7 @@
 #            name             hp   dmg  speed range cool  capR capHH
 SPECIES = [("Raptor",        120, 25, 720, 190, 0.8,  55,  80),
            ("Dilophosaurus", 140, 28, 560, 230, 1.0,  65, 150),
+           ("Psittacosaurus", 90, 16, 620, 150, 0.7,  40,  64),   # back 2026-10-20: its clips are repaired
            ("Parasaurolophus", 230, 30, 520, 300, 1.2, 95, 200),
            ("Spinosaurus",   270, 45, 520, 340, 1.4, 100, 190),
            ("Triceratops",   300, 50, 430, 290, 1.5, 110, 175),
@@ -14,10 +15,15 @@ SPECIES = [("Raptor",        120, 25, 720, 190, 0.8,  55,  80),
            ("Compy",          60,  8, 750, 110, 0.4,  30,  40),
            ("Kulindadromeus", 70, 10, 700, 120, 0.5,  32,  42)]
 D = r"C:/repos/Unreal Projects/Timeshift3D/Saved/morph_dsl/"
+# extra attack moves per species (authored by dino_attack_anims.py); the original Attack clip is always move 0
+VARIANTS = {"Raptor": ["Pounce", "TailSwipe"], "Dilophosaurus": ["Pounce", "TailSwipe"], "Compy": ["Pounce", "TailSwipe"],
+            "Kulindadromeus": ["Pounce", "TailSwipe"], "Psittacosaurus": ["Charge"], "Triceratops": ["Charge"],
+            "Parasaurolophus": ["Charge", "TailSwipe"], "Spinosaurus": ["Charge", "TailSwipe"], "Ankylosaurus": ["Charge", "TailSwipe"],
+            "Stegosaurus": ["TailSwipe"]}
 # camera: extra distance behind (along the boom) ~ body half-length, and lift ~ body height
 CAMBACK = {"Raptor": 120, "Dilophosaurus": 280, "Psittacosaurus": 40, "Parasaurolophus": 520, "Spinosaurus": 460,
            "Triceratops": 400, "Stegosaurus": 460, "Ankylosaurus": 340,
-           "Compy": 0, "Kulindadromeus": 0}
+           "Compy": 0, "Kulindadromeus": 0, "Psittacosaurus": 40}
 
 
 def path(sp, what):
@@ -39,7 +45,11 @@ for i, (sp, hp, dmg, spd, rng, cd, r, hh) in enumerate(SPECIES):
         '(Variables|Default|SetMorphCamBack %.1f)' % CAMBACK[sp], '(Variables|Default|SetMorphCamUp %.1f)' % (hh * 0.45),
         '(Variables|Default|SetMorphMeshAsset "%s")' % path(sp, "mesh"),
         '(Variables|Default|SetMorphIdle "%s")' % path(sp, "Idle"), '(Variables|Default|SetMorphWalk "%s")' % path(sp, "Walk"),
-        '(Variables|Default|SetMorphRun "%s")' % path(sp, "Run"), '(Variables|Default|SetMorphAttack "%s")' % path(sp, "Attack")])
+        '(Variables|Default|SetMorphRun "%s")' % path(sp, "Run"), '(Variables|Default|SetMorphAttack "%s")' % path(sp, "Attack"),
+        '(Variables|Default|SetMorphAtk2 "%s")' % path(sp, VARIANTS[sp][0]),
+        '(Variables|Default|SetMorphAtk3 "%s")' % path(sp, VARIANTS[sp][-1]),
+        '(Variables|Default|SetMorphAtkCount %d)' % (1 + len(VARIANTS[sp])),
+        '(Variables|Default|SetMorphRoar "%s")' % path(sp, "Roar")])
     body += ("  (if (== Index %d)\n%s)\n" % (i, sets))
 open(D + "PickMorphSpecies.dsl", "w").write(
     "(fn PickMorphSpecies (Index)\n  ; morph pool: " + ", ".join(s[0] for s in SPECIES) + "\n" + body.rstrip() + ")\n")

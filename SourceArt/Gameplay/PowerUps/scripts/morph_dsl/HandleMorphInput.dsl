@@ -1,5 +1,6 @@
 (fn HandleMorphInput ()
   ; M = use a morph charge (polled with the other throw keys); while charged but not morphed, a "MORPH READY" line stays up
+  (CallFunction|CleanupOrphanTorches self)
   (bind mk (Game|Player|IsInputKeyDown (Game|GetPlayerController 0) "M"))
   (if (and (and mk (not (Variables|Default|GetMorphKeyPressed))) (and (> (Variables|Default|GetMorphCharges) 0) (not (Variables|Default|GetMorphed))))
     (CallFunction|StartMorph self))

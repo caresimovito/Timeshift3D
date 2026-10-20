@@ -3,12 +3,11 @@
   ; ARMOUR (absorbs damage first, has a HUD bar), so the hero's own health is untouched; the morph ends early when it
   ; runs out. Everything changed here is saved for EndMorph.
   (Variables|Default|SetMorphCharges (- (Variables|Default|GetMorphCharges) 1))
-  (CallFunction|PickMorphSpecies self (Math|Random|RandomIntegerinRange 0 8))
+  (CallFunction|PickMorphSpecies self (Math|Random|RandomIntegerinRange 0 9))
   (CallFunction|EnsureMorphBody self)
   (Variables|Default|SetMorphed true)
   (Variables|Default|SetMorphEnd (+ (Utilities|Time|GetGameTimeinSeconds) 30.0))
-  (Variables|Default|SetMorphAttackEnd 0.0)
-  (Variables|Default|SetMorphAnimState -1)
+  (Variables|Default|SetMorphAttackEnd (+ (Utilities|Time|GetGameTimeinSeconds) 1.6))
   (bind hc (Variables|Default|GetHealthComponent))
   (bind cap (Variables|Character|GetCapsuleComponent))
   (Variables|Default|SetSavedArmour (Class|BPHealthComponent|GetArmour hc))
@@ -34,6 +33,9 @@
   (Components|SkinnedMesh|SetSkinnedAssetandUpdate :self mb :NewMesh (Variables|Default|GetMorphMeshAsset) :bReinitPose true)
   (Transformation|SetRelativeLocation mb (Math|Vector|MakeVector 0.0 0.0 (- (Variables|Default|GetMorphHalf))) false false)
   (Rendering|SetVisibility mb true)
+  ; transform with a roar (MorphTick leaves it playing until MorphAttackEnd)
+  (Components|Animation|PlayAnimation :self mb :NewAnimToPlay (Variables|Default|GetMorphRoar) :bLooping false)
+  (Variables|Default|SetMorphAnimState 2)
   ; camera: the EventGraph re-sets the boom length / socket offset every tick, so pull the CAMERA back along the boom
   ; (and up) instead - nothing else touches its relative location
   (Transformation|SetRelativeLocation (Variables|Components|GetFollowCamera) (Math|Vector|MakeVector (- (.x (Variables|Default|GetSavedCamLoc)) (Variables|Default|GetMorphCamBack)) (.y (Variables|Default|GetSavedCamLoc)) (+ (.z (Variables|Default|GetSavedCamLoc)) (Variables|Default|GetMorphCamUp))) false false)

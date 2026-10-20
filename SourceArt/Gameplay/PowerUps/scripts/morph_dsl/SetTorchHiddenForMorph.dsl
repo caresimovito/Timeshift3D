@@ -1,7 +1,7 @@
 (fn SetTorchHiddenForMorph (Hide)
-  ; the torch mesh is added straight to the capsule (EquipTorch), so shrinking the hero's mesh doesn't hide it; its light
-  ; and flame are attached to it. HiddenInGame is a separate flag from the visibility ApplyWeaponSelection drives.
-  (Utilities|IsValid (Variables|Default|GetTorchMeshComponent)
-    (:"Is Valid"
-      (Development|SetHiddeninGame :self (Variables|Default|GetTorchMeshComponent) :NewHidden Hide :bPropagateToChildren true))
-    (:"Is Not Valid")))
+  ; every torch mesh on the hero, not just TorchMeshComponent: EquipTorch adds a NEW torch component each time it runs
+  ; (I key, torch pickups) and never removes the old one, so unlit "orphan" torches stay stuck to the capsule.
+  ; HiddenInGame is a separate flag from the visibility ApplyWeaponSelection / TorchBurnOut drive.
+  (bind arr (Actor|GetComponentsByClass self "/Script/Engine.StaticMeshComponent"))
+  (for c arr
+    (CallFunction|HideIfTorch self c Hide)))
