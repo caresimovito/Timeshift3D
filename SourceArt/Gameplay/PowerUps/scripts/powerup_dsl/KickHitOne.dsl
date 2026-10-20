@@ -1,0 +1,12 @@
+(fn KickHitOne (Target)
+  ; same as before (18 damage + knockback for smaller dinos), doubled while Fury is active
+  (bind hc (Utilities|Casting|CastToBP_HealthComponent :Object (Actor|GetComponentbyClass Target "/Game/Timeshift/Components/BP_HealthComponent.BP_HealthComponent_C")))
+  (bind eb (Utilities|Casting|CastToBP_EnemyBase :Object Target))
+  (if (not (Class|BPHealthComponent|GetIsDead hc))
+    (if (< (Math|Vector|VectorLengthXY (- (Transformation|GetActorLocation Target) (Transformation|GetActorLocation self))) 230.0)
+      (if (> (Transformation|GetHorizontalDotProductTo self Target) 0.35)
+        (Class|BPHealthComponent|ApplyDamage hc (* 18.0 (select (Variables|Default|GetFuryActive) 2.0 1.0)))
+        (CallFunction|PlayHitImpact self Target)
+        (bind fw (Transformation|GetActorForwardVector self))
+        (bind kb (select (< (Class|BPEnemyBase|GetBodyRadius eb) 130.0) 2000.0 0.0))
+        (Class|BPEnemyBase|ReceiveKnockback :self eb :Push (Math|Vector|MakeVector (* (.x fw) kb) (* (.y fw) kb) (* (.z fw) kb)))))))

@@ -1,0 +1,6 @@
+(fn Heal (HealAmount)
+  ; new health worked out once (the old pure expression re-evaluated after SetCurrentHealth and broadcast health+heal)
+  (if (not (Variables|Default|GetIsDead))
+    (Variables|Default|SetPendingHealth (Math|Float|Min(Float) (+ (Variables|Default|GetCurrentHealth) HealAmount) (Variables|Default|GetMaxHealth)))
+    (Variables|Default|SetCurrentHealth (Variables|Default|GetPendingHealth))
+    (Default|CallOnHealthChanged self (Variables|Default|GetPendingHealth) (Variables|Default|GetMaxHealth))))

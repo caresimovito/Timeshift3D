@@ -5,4 +5,5 @@
   (bind rk (Game|Player|IsInputKeyDown (Game|GetPlayerController 0) "R"))
   (if (and rk (not (Variables|Default|GetBolaThrowPressed)))
     (CallFunction|QuickBola self))
-  (Variables|Default|SetBolaThrowPressed rk))
+  (Variables|Default|SetBolaThrowPressed rk)
+  (CallFunction|HandleMorphInput self))

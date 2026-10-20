@@ -11,7 +11,7 @@
     (bind hc (Utilities|Casting|CastToBP_HealthComponent :Object (Actor|GetComponentbyClass Other "/Game/Timeshift/Components/BP_HealthComponent.BP_HealthComponent_C"))
       (:then
         (Variables|Default|SetSnared Other)
-        (Class|BPHealthComponent|ApplyDamage hc 5.0)
+        (Class|BPHealthComponent|ApplyDamage hc (Variables|Default|GetDamage))
         (Components|Movement|StopMovementImmediately (Variables|Default|GetMovement))
         (Collision|SetCollisionEnabled (Variables|Default|GetCollision) "NoCollision")
         (Components|Activation|Deactivate (Variables|Default|GetSpin))

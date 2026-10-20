@@ -1,5 +1,5 @@
 (fn QuickThrow ()
-  (if (and (not (Variables|Default|GetIsRangedAttacking)) (> (Variables|Default|GetStoneAmmo) 0))
+  (if (and (not (Variables|Default|GetMorphed)) (and (not (Variables|Default|GetIsRangedAttacking)) (> (Variables|Default|GetStoneAmmo) 0)))
     (Variables|Default|SetThrowingBola false)
     (if (Variables|Default|GetIsAiming)
       (CallFunction|AimAtCrosshair self)

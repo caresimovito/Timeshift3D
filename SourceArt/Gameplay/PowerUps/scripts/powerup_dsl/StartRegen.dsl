@@ -1,0 +1,9 @@
+(fn StartRegen (Duration Total)
+  ; Regeneration herb: heals Total health spread over Duration s (every 0.5 s), green glow, on-screen countdown.
+  (Variables|Default|SetRegenActive true)
+  (Variables|Default|SetRegenEnd (+ (Utilities|Time|GetGameTimeinSeconds) Duration))
+  (Variables|Default|SetRegenPerTick (/ Total (Math|Float|Max(Float) 1.0 (* Duration 2.0))))
+  (CallFunction|EnsureBuffLights self)
+  (Rendering|SetVisibility (Variables|Default|GetRegenLight) true)
+  (Utilities|Time|SetTimerbyFunctionName :Object self :FunctionName "RegenTick" :Time 0.5 :bLooping true)
+  (Development|PrintString :InString "Regenerating..." :bPrintToScreen true :bPrintToLog true :TextColor "(R=0.300000,G=1.000000,B=0.400000,A=1.000000)" :Duration 2.5))

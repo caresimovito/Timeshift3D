@@ -1,5 +1,5 @@
 (fn QuickBola ()
-  (if (and (not (Variables|Default|GetIsRangedAttacking)) (> (Variables|Default|GetBolaCount) 0))
+  (if (and (not (Variables|Default|GetMorphed)) (and (not (Variables|Default|GetIsRangedAttacking)) (> (Variables|Default|GetBolaCount) 0)))
     (Variables|Default|SetThrowingBola true)
     (if (Variables|Default|GetIsAiming)
       (CallFunction|AimAtCrosshair self)
