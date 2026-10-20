@@ -1,0 +1,8 @@
+(fn HandleBolaThrow ()
+  ; R throws a bola (this used to just zero BolaCount every 0.05 s)
+  (if (< (Variables|Default|GetBolaCount) 0)
+    (Variables|Default|SetBolaCount 0))
+  (bind rk (Game|Player|IsInputKeyDown (Game|GetPlayerController 0) "R"))
+  (if (and rk (not (Variables|Default|GetBolaThrowPressed)))
+    (CallFunction|QuickBola self))
+  (Variables|Default|SetBolaThrowPressed rk))

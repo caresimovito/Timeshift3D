@@ -1,0 +1,10 @@
+(fn EnsurePouches ()
+  (Utilities|IsValid (Variables|Default|GetPouchLComponent)
+    (:"Is Valid")
+    (:"Is Not Valid"
+      (bind l (Game|AddComponentbyClass self "/Script/Engine.StaticMeshComponent"))
+      (Variables|Default|SetPouchLComponent l)
+      (Components|StaticMesh|SetStaticMesh l "/Game/Timeshift/Weapons/Meshes/SM_Pouch.SM_Pouch")
+      (Collision|SetCollisionEnabled l "NoCollision")
+      (Transformation|AttachComponentToComponent l (Variables|Character|GetMesh) "pelvis" :LocationRule "SnapToTarget" :RotationRule "SnapToTarget" :ScaleRule "KeepRelative")
+      (Transformation|SetRelativeLocationAndRotation l (Math|Vector|MakeVector 4.30 -2.60 -20.44) (Math|Rotator|MakeRotator :Roll 96.00 :Pitch -87.47 :Yaw -88.06)))))

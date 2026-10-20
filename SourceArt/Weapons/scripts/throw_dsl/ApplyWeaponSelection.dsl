@@ -1,0 +1,15 @@
+(fn ApplyWeaponSelection ()
+  (CallFunction|EnsureBackWeapons self)
+  (bind idx (Variables|Default|GetCurrentWeaponIndex))
+  (bind torchOn (and (== idx 2) (Variables|Default|GetHasTorch)))
+  (bind clubOn (and (== idx 1) (Variables|Default|GetHasBoneClub)))
+  (if (Variables|Default|GetHasTorch)
+    (Rendering|SetVisibility (Variables|Default|GetTorchMeshComponent) torchOn)
+    (Rendering|SetVisibility (Variables|Default|GetTorchLightComponent) torchOn)
+    (Rendering|SetVisibility (Variables|Default|GetTorchFlameComponent) torchOn))
+  (Rendering|SetVisibility (Variables|Default|GetClubMeshComponent) clubOn)
+  ; the spear only shows once it has been picked up (bHasSpear), otherwise he is empty-handed
+  (Rendering|SetVisibility (Variables|Default|GetSpearMeshComponent) (and (Variables|Default|GetHasSpear) (not (or torchOn clubOn))))
+  ; owned but not in hand -> on the back
+  (Rendering|SetVisibility (Variables|Default|GetSpearBackComponent) (and (Variables|Default|GetHasSpear) (or torchOn clubOn)))
+  (Rendering|SetVisibility (Variables|Default|GetClubBackComponent) (and (Variables|Default|GetHasBoneClub) (not clubOn))))

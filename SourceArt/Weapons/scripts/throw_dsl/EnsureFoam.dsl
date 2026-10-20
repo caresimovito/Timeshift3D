@@ -1,0 +1,11 @@
+(fn EnsureFoam ()
+  (Utilities|IsValid (Variables|Default|GetFoamComponent)
+    (:"Is Valid")
+    (:"Is Not Valid"
+      (bind f (Game|AddComponentbyClass self "/Script/Engine.StaticMeshComponent"))
+      (Variables|Default|SetFoamComponent f)
+      (Components|StaticMesh|SetStaticMesh f "/Engine/BasicShapes/Plane.Plane")
+      (Rendering|Material|SetMaterial f 0 "/Game/Timeshift/Environment/Water/M_WadeFoam.M_WadeFoam")
+      (Collision|SetCollisionEnabled f "NoCollision")
+      (Rendering|SetCastShadow f false)
+      (Rendering|SetVisibility f false))))

@@ -1,0 +1,27 @@
+(fn ComputeThrowRot ()
+  (bind ar (Variables|Default|GetAimRotation))
+  (Variables|Default|SetThrowRot (Math|Rotator|MakeRotator :Roll 0.0 :Pitch (+ (.pitch ar) 8.0) :Yaw (.yaw ar)))
+  (if (Variables|Default|GetAimedThrow)
+    ; aimed (right mouse): straight at the crosshair point, capped at 35 m out along that line, lifted for gravity
+    (bind from (Transformation|GetWorldLocation (Variables|Default|GetHeldStoneComponent)))
+    (bind ap (Variables|Default|GetAimPoint))
+    (bind dir (Math|Vector|Normalize (Math|Vector|MakeVector (- (.x ap) (.x from)) (- (.y ap) (.y from)) (- (.z ap) (.z from)))))
+    (Variables|Default|SetAimDist (Math|Float|Min(Float) (Math|Vector|Distance(Vector) ap from) 3500.0))
+    (bind aimpt (Math|Vector|MakeVector (+ (.x from) (* (.x dir) (Variables|Default|GetAimDist))) (+ (.y from) (* (.y dir) (Variables|Default|GetAimDist))) (+ (.z from) (* (.z dir) (Variables|Default|GetAimDist)))))
+    (bind la (Math|Rotator|FindLookatRotation from aimpt))
+    (bind tt (/ (Variables|Default|GetAimDist) (select (Variables|Default|GetThrowingBola) 2300.0 3000.0)))
+    (bind drop (* (* 0.5 (select (Variables|Default|GetThrowingBola) 784.0 980.0)) (* tt tt)))
+    (Variables|Default|SetThrowRot (Math|Rotator|MakeRotator :Roll 0.0 :Pitch (+ (.pitch la) (Math|Trig|Atan2(Degrees) drop (Variables|Default|GetAimDist))) :Yaw (.yaw la)))
+    (return))
+  (bind tgt (Variables|Default|GetThrowTarget))
+  (Utilities|IsValid tgt
+    (:"Is Valid"
+      ; aim at the target and lift the throw just enough for gravity over that distance
+      (bind from (Transformation|GetWorldLocation (Variables|Default|GetHeldStoneComponent)))
+      (bind aimpt (+ (Transformation|GetActorLocation tgt) (Math|Vector|MakeVector 0.0 0.0 20.0)))
+      (bind la (Math|Rotator|FindLookatRotation from aimpt))
+      (bind dist (Math|Vector|VectorLength (- aimpt from)))
+      (bind tt (/ dist (select (Variables|Default|GetThrowingBola) 2300.0 3000.0)))
+      (bind drop (* (* 0.5 (select (Variables|Default|GetThrowingBola) 784.0 980.0)) (* tt tt)))
+      (Variables|Default|SetThrowRot (Math|Rotator|MakeRotator :Roll 0.0 :Pitch (+ (.pitch la) (Math|Trig|Atan2(Degrees) drop dist)) :Yaw (.yaw la))))
+    (:"Is Not Valid")))
