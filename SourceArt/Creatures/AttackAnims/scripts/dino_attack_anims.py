@@ -3,6 +3,11 @@
 #   Charge    - head and neck drop, the body lunges forward, recovers
 #   Pounce    - crouch, leap forward, two quick head snaps, land
 #   Roar      - rears up, head thrown back, shakes, settles
+#   Stomp     - (quadrupeds) front half rears up, forefeet slam down
+#   Gore      - (horned) head drops low, then tosses up with a twist
+#   Frenzy    - (predators) neck thrust forward, three quick snaps left / right / centre
+#   Slash     - (bipeds with hands) lean in, claws rake down left then right
+#   Sidestep  - (small predators) hop to the side, turn back in and lunge-bite
 # Every species shares the core bones (pelvis, spine_01-03, neck_01-02, head, tail_01-06, legs), so each move is defined
 # ONCE as body-space rotations (Z = yaw/sideways, Y = pitch/up-down; meshes face +X) applied on top of the species' idle
 # pose, then converted to each bone's local space by forward kinematics. Pelvis offsets are in units of pelvis height.
@@ -111,7 +116,72 @@ def roar(t):
     return r, (-0.05 * u, 0.0, 0.05 * u)
 
 
-MOVE_DEFS = {"TailSwipe": (tail_swipe, 1.1), "Charge": (charge, 1.0), "Pounce": (pounce, 1.0), "Roar": (roar, 1.6)}
+def stomp(t):
+    # quadrupeds: rear the front half up off the ground, then slam the forefeet down with the head
+    u = env(t, [(0, 0), (0.4, 1), (0.55, 1), (0.7, -0.25), (0.85, -0.15), (1.2, 0)])
+    lift, slam = max(0.0, u), max(0.0, -u) * 4
+    r = {"pelvis": [(Y, -16 * u * PITCH_DOWN)], "spine_01": [(Y, -4 * u * PITCH_DOWN)],
+         "neck_01": [(Y, (8 * lift + 12 * slam) * PITCH_DOWN)], "head": [(Y, (4 * lift + 10 * slam) * PITCH_DOWN)],
+         # the hind legs hang off the pelvis: counter its pitch so the back feet stay planted
+         "leg_L_upper": [(Y, 16 * u * PITCH_DOWN)], "leg_R_upper": [(Y, 16 * u * PITCH_DOWN)],
+         "tail_01": [(Y, 10 * u * PITCH_DOWN)], "tail_02": [(Y, 6 * u * PITCH_DOWN)]}
+    for b in ("arm_L_upper", "arm_R_upper"):
+        r[b] = [(Y, -30 * lift * PITCH_DOWN)]                                # forelegs reach forward and up
+    for b in ("arm_L_lower", "arm_R_lower"):
+        r[b] = [(Y, 35 * lift * PITCH_DOWN)]                                 # knees fold
+    return r, (-0.05 * lift, 0.0, 0.08 * lift - 0.06 * max(0.0, -u))
+
+
+def gore(t):
+    # horned heads: drop low, then a hard upward toss with a twist
+    d = env(t, [(0, 0), (0.3, 1), (0.42, 1), (0.55, -1), (0.65, -1), (0.9, 0)])
+    tw = env(t, [(0, 0), (0.42, 0), (0.55, 1), (0.7, 1), (0.9, 0)])
+    l = env(t, [(0, 0), (0.3, -0.05), (0.5, 0.25), (0.65, 0.25), (0.9, 0)])
+    r = {"spine_03": [(Y, 4 * d * PITCH_DOWN)], "neck_01": [(Y, 14 * d * PITCH_DOWN)], "neck_02": [(Y, 10 * d * PITCH_DOWN)],
+         "head": [(Y, 16 * d * PITCH_DOWN), (Z, 14 * tw * YAW_LEFT)], "tail_01": [(Y, -4 * d * PITCH_DOWN)]}
+    return r, (l, 0.0, -0.04 * max(0.0, d))
+
+
+def frenzy(t):
+    # predators: neck thrust forward, three fast snaps left-right-centre
+    f = env(t, [(0, 0), (0.15, 1), (0.8, 1), (1.0, 0)])
+    k = (t - 0.15) / 0.65
+    snap = math.sin(k * 2 * math.pi * 3) if 0 < k < 1 else 0.0            # three bites
+    side = env(k, [(0, -1), (0.33, -1), (0.4, 1), (0.66, 1), (0.73, 0)]) if 0 < k < 1 else 0.0
+    r = {"spine_03": [(Y, 5 * f * PITCH_DOWN)], "neck_01": [(Y, 8 * f * PITCH_DOWN), (Z, 9 * side * f)],
+         "neck_02": [(Y, 6 * f * PITCH_DOWN)], "head": [(Y, 16 * snap * f * PITCH_DOWN), (Z, 8 * side * f)],
+         "tail_01": [(Z, -6 * side * f)], "tail_02": [(Z, -8 * side * f)], "tail_03": [(Z, -10 * side * f)]}
+    return r, (0.15 * f, 0.0, -0.04 * f)
+
+
+def slash(t):
+    # bipeds with hands: lean in and rake both claws down, left then right
+    lean = env(t, [(0, 0), (0.2, 1), (0.7, 1), (0.9, 0)])
+    aL = env(t, [(0, 0), (0.2, 1), (0.38, -0.7), (0.55, 0), (0.9, 0)])
+    aR = env(t, [(0, 0), (0.35, 1), (0.53, -0.7), (0.7, 0), (0.9, 0)])
+    r = {"spine_02": [(Y, 5 * lean * PITCH_DOWN)], "spine_03": [(Y, 6 * lean * PITCH_DOWN), (Z, 6 * (aL - aR))],
+         "neck_01": [(Y, -4 * lean * PITCH_DOWN)], "head": [(Y, 6 * lean * PITCH_DOWN)],
+         "hand_arm_L_upper": [(Y, -55 * aL * PITCH_DOWN)], "hand_arm_L_lower": [(Y, -30 * aL * PITCH_DOWN)],
+         "hand_arm_R_upper": [(Y, -55 * aR * PITCH_DOWN)], "hand_arm_R_lower": [(Y, -30 * aR * PITCH_DOWN)],
+         "tail_01": [(Y, -4 * lean * PITCH_DOWN)]}
+    return r, (0.2 * lean, 0.0, -0.03 * lean)
+
+
+def sidestep(t):
+    # small predators: hop to the side, turn back in and lunge-bite
+    s = env(t, [(0, 0), (0.3, 1), (0.75, 1), (1.1, 0)])
+    hop = math.sin(math.pi * t / 0.3) if t < 0.3 else 0.0                   # up and over during the side hop
+    b = env(t, [(0, 0), (0.4, 0), (0.55, 1), (0.7, 0)])
+    r = {"pelvis": [(Z, -14 * s)], "spine_03": [(Z, -6 * s)], "neck_01": [(Z, -8 * s), (Y, 10 * b * PITCH_DOWN)],
+         "head": [(Y, 16 * b * PITCH_DOWN)], "tail_01": [(Z, 8 * s)], "tail_02": [(Z, 10 * s)],
+         "leg_L_upper": [(Y, -12 * hop * PITCH_DOWN)], "leg_R_upper": [(Y, -12 * hop * PITCH_DOWN)],
+         "leg_L_lower": [(Y, 22 * hop * PITCH_DOWN)], "leg_R_lower": [(Y, 22 * hop * PITCH_DOWN)]}
+    return r, (0.25 * b, 0.6 * s, 0.25 * hop)
+
+
+MOVE_DEFS = {"TailSwipe": (tail_swipe, 1.1), "Charge": (charge, 1.0), "Pounce": (pounce, 1.0), "Roar": (roar, 1.6),
+             "Stomp": (stomp, 1.2), "Gore": (gore, 0.9), "Frenzy": (frenzy, 1.0), "Slash": (slash, 0.9),
+             "Sidestep": (sidestep, 1.1)}
 
 
 # ---------------- per-species base pose + FK ----------------

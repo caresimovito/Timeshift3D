@@ -1,5 +1,6 @@
 # Editor Python: create BP_AttackVariety (ActorComponent) - logic is written separately with the DSL; MODE='attach' adds
-# it to BP_EnemyBase as a component named AttackVariety (no graph of BP_EnemyBase is touched).
+# it to TARGET (default BP_EnemyBase) as a component named AttackVariety (none of the target's graphs is touched). The
+# hero carries one too, so the morph can play the same moves (its Watch tick does nothing: the owner is not an enemy).
 import unreal
 TAG = "[AVB]"
 EAL = unreal.EditorAssetLibrary
@@ -13,7 +14,7 @@ if mode == "create":
     EAL.save_asset(P, only_if_is_dirty=False)
     unreal.log_warning("%s created %s" % (TAG, EAL.does_asset_exist(P)))
 else:
-    eb = EAL.load_asset("/Game/Timeshift/Enemies/BP_EnemyBase")
+    eb = EAL.load_asset(globals().get("TARGET", "/Game/Timeshift/Enemies/BP_EnemyBase"))
     cls = unreal.load_class(None, P + ".BP_AttackVariety_C")
     sds = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
     LIB = unreal.SubobjectDataBlueprintFunctionLibrary

@@ -12,16 +12,16 @@
   (bind mb (Variables|Default|GetMorphBody))
   (bind atk (Variables|Default|GetIsAttacking))
   (if (and atk (not (Variables|Default|GetMorphWasAttacking)))
-    ; a random move from this species' set (0 = its original bite, 1-2 = authored moves); roll ONCE into a variable
-    (Variables|Default|SetMorphAtkPick (Math|Random|RandomIntegerinRange 0 (- (Variables|Default|GetMorphAtkCount) 1)))
-    (if (== (Variables|Default|GetMorphAtkPick) 1)
-      (Components|Animation|PlayAnimation :self mb :NewAnimToPlay (Variables|Default|GetMorphAtk2) :bLooping false)
-      (elif (== (Variables|Default|GetMorphAtkPick) 2)
-        (Components|Animation|PlayAnimation :self mb :NewAnimToPlay (Variables|Default|GetMorphAtk3) :bLooping false)
-        (else
-          (Components|Animation|PlayAnimation :self mb :NewAnimToPlay (Variables|Default|GetMorphAttack) :bLooping false))))
+    ; a random move from this species' set, shared with the enemies through the hero's AttackVariety component
+    ; (0 = its original bite, 1..N = authored moves); roll ONCE into a variable
+    (bind av (Variables|Default|GetAttackVariety))
+    (Variables|Default|SetMorphAtkPick (Math|Random|RandomIntegerinRange 0 (Class|BPAttackVariety|MoveCount :self av :Species (Variables|Default|GetMorphName))))
     (Variables|Default|SetMorphAnimState 2)
-    (Variables|Default|SetMorphAttackEnd (+ (Utilities|Time|GetGameTimeinSeconds) (select (== (Variables|Default|GetMorphAtkPick) 0) 0.9 1.05))))
+    (if (== (Variables|Default|GetMorphAtkPick) 0)
+      (Components|Animation|PlayAnimation :self mb :NewAnimToPlay (Variables|Default|GetMorphAttack) :bLooping false)
+      (Variables|Default|SetMorphAttackEnd (+ (Utilities|Time|GetGameTimeinSeconds) 0.9))
+      (else
+        (Variables|Default|SetMorphAttackEnd (+ (Utilities|Time|GetGameTimeinSeconds) (Class|BPAttackVariety|PlayMove :self av :Body mb :Species (Variables|Default|GetMorphName) :Move (Variables|Default|GetMorphAtkPick)))))))
   (Variables|Default|SetMorphWasAttacking atk)
   (if (> (Utilities|Time|GetGameTimeinSeconds) (Variables|Default|GetMorphAttackEnd))
     (bind spd (Math|Vector|VectorLengthXY (Transformation|GetVelocity self)))

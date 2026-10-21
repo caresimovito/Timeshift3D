@@ -4,12 +4,17 @@
 #  - bHasBeenProvoked turns true (it has spotted the player): play the species' Roar
 # Flyers have no entries, so they are left alone.
 D = r"C:/repos/Unreal Projects/Timeshift3D/Saved/attack_dsl/"
-MOVES = {"Raptor": ["Pounce", "TailSwipe"], "Dilophosaurus": ["Pounce", "TailSwipe"], "Compy": ["Pounce", "TailSwipe"],
-         "Kulindadromeus": ["Pounce", "TailSwipe"], "Caudipteryx": ["Pounce", "TailSwipe"], "RiverAmbusher": ["Pounce", "TailSwipe"],
-         "Triceratops": ["Charge"], "Psittacosaurus": ["Charge"], "Archaeoceratops": ["Charge"],
-         "Parasaurolophus": ["Charge", "TailSwipe"], "Spinosaurus": ["Charge", "TailSwipe"], "Ankylosaurus": ["Charge", "TailSwipe"],
-         "Stegosaurus": ["TailSwipe"]}
-LEN = {"Pounce": 1.0, "TailSwipe": 1.1, "Charge": 1.0, "Roar": 1.6}
+MOVES = {"Raptor": ["Pounce", "TailSwipe", "Frenzy", "Slash", "Sidestep"],
+         "Dilophosaurus": ["Pounce", "TailSwipe", "Frenzy", "Slash", "Sidestep"],
+         "Compy": ["Pounce", "TailSwipe", "Frenzy", "Slash", "Sidestep"],
+         "Caudipteryx": ["Pounce", "TailSwipe", "Frenzy", "Slash", "Sidestep"],
+         "Kulindadromeus": ["Pounce", "TailSwipe", "Sidestep"], "RiverAmbusher": ["Pounce", "TailSwipe", "Frenzy", "Stomp"],
+         "Triceratops": ["Charge", "Gore", "Stomp"], "Psittacosaurus": ["Charge", "Gore", "Sidestep"],
+         "Archaeoceratops": ["Charge", "Gore", "Sidestep"], "Parasaurolophus": ["Charge", "TailSwipe", "Gore", "Stomp"],
+         "Spinosaurus": ["Charge", "TailSwipe", "Frenzy", "Slash"], "Ankylosaurus": ["Charge", "TailSwipe", "Gore", "Stomp"],
+         "Stegosaurus": ["TailSwipe", "Stomp"]}
+LEN = {"Pounce": 1.0, "TailSwipe": 1.1, "Charge": 1.0, "Roar": 1.6, "Stomp": 1.2, "Gore": 0.9, "Frenzy": 1.0, "Slash": 0.9,
+       "Sidestep": 1.1}
 
 
 def path(sp, clip):
