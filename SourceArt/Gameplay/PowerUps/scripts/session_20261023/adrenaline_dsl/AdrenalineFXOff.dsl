@@ -1,0 +1,11 @@
+(fn AdrenalineFXOff ()
+  ; undo AdrenalineFXOn (Fury's glow overlay is put back if Fury is still on)
+  (Rendering|Material|SetOverlayMaterial :self (Variables|Character|GetMesh) :NewOverlayMaterial "None")
+  (if (Variables|Default|GetFuryActive)
+    (CallFunction|FuryFXOn self))
+  (for c (Variables|Default|GetAdrenalineFX)
+    (Components|DestroyComponent :self c))
+  (Utilities|Array|Clear :TargetArray (Variables|Default|GetAdrenalineFX))
+  (Utilities|IsValid (Variables|Default|GetAdrenalineLight)
+    (:"Is Valid"
+      (Rendering|SetVisibility (Variables|Default|GetAdrenalineLight) false))))

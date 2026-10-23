@@ -32,6 +32,10 @@
   ; different bone layout (Psittacosaurus has an extra root) kept the old pose and collapsed to a point - invisible
   (Components|SkinnedMesh|SetSkinnedAssetandUpdate :self mb :NewMesh (Variables|Default|GetMorphMeshAsset) :bReinitPose true)
   (Transformation|SetRelativeLocation mb (Math|Vector|MakeVector 0.0 0.0 (- (Variables|Default|GetMorphHalf))) false false)
+  ; feet fix: Psittacosaurus keeps its armature bone 63 cm below the mesh origin (engine holds it there) - lift by the gap
+  (bind msink (- (.z (Transformation|GetWorldLocation mb)) (.z (Transformation|GetSocketLocation mb (Components|SkinnedMesh|GetBoneName mb 0)))))
+  (if (> msink 3.0)
+    (Transformation|AddWorldOffset mb (Math|Vector|MakeVector 0.0 0.0 msink) false false))
   (Rendering|SetVisibility mb true)
   ; transform with a roar (MorphTick leaves it playing until MorphAttackEnd)
   (Components|Animation|PlayAnimation :self mb :NewAnimToPlay (Variables|Default|GetMorphRoar) :bLooping false)

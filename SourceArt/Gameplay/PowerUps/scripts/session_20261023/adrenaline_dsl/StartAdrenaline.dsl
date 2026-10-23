@@ -1,0 +1,7 @@
+(fn StartAdrenaline (Duration)
+  (Variables|Default|SetBaseWalkSpeed 760.0)
+  (Variables|Default|SetAdrenaline true)
+  (Class|CharacterMovementComponent|SetMaxWalkSpeed 760.0 (Variables|Character|GetCharacterMovement))
+  (CallFunction|AdrenalineFXOn self)
+  (Utilities|Time|SetTimerbyFunctionName :Object self :FunctionName "EndAdrenaline" :Time Duration :bLooping false)
+  (Development|PrintString :InString "Adrenaline surge" :bPrintToScreen true :bPrintToLog true :TextColor "(R=0.500000,G=0.750000,B=1.000000,A=1.000000)" :Duration 3.0))

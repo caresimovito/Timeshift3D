@@ -1,0 +1,15 @@
+(fn HeroHit (Reach AnyDir DmgFrac Push Up Mode)
+  ; the morphed hero's move connects with every enemy within reach (in front, unless it hits all round)
+  (bind me (Variables|Default|GetOwnerHero))
+  (bind all (Actor|GetAllActorsOfClass :ActorClass "/Game/Timeshift/Enemies/BP_EnemyBase.BP_EnemyBase_C"))
+  (for a all
+    (if (and (< (Transformation|GetHorizontalDistanceTo :self me :OtherActor a) (* Reach (Class|BPThirdPersonCharacter|GetMorphRange me))) (or AnyDir (> (Transformation|GetHorizontalDotProductTo :self me :OtherActor a) 0.3)))
+      (bind eb (Utilities|Casting|CastToBP_EnemyBase :Object a)
+        (:then
+          (bind hc (Class|BPEnemyBase|GetHealthComponent eb))
+          (if (not (Class|BPHealthComponent|GetIsDead hc))
+            (Class|BPHealthComponent|ApplyDamage :self hc :DamageAmount (* DmgFrac (Class|BPThirdPersonCharacter|GetMorphDmg me)))
+            (CallFunction|SetPush self me eb Mode)
+            (bind pd (Variables|Default|GetPushDir))
+            (Class|BPEnemyBase|ReceiveKnockback :self eb :Push (Math|Vector|MakeVector (* (.x pd) (* 1.5 Push)) (* (.y pd) (* 1.5 Push)) 0.0))))
+        (:CastFailed)))))

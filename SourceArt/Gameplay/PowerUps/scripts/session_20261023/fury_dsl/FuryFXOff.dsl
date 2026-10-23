@@ -1,0 +1,8 @@
+(fn FuryFXOff ()
+  ; undo FuryFXOn (the screen effect fades out in FuryTick)
+  (Rendering|Material|SetOverlayMaterial :self (Variables|Character|GetMesh) :NewOverlayMaterial "None")
+  (Rendering|Material|SetOverlayMaterial :self (Variables|Default|GetSpearMeshComponent) :NewOverlayMaterial "None")
+  (Rendering|Material|SetOverlayMaterial :self (Variables|Default|GetClubMeshComponent) :NewOverlayMaterial "None")
+  (for c (Variables|Default|GetFuryFX)
+    (Components|DestroyComponent :self c))
+  (Utilities|Array|Clear :TargetArray (Variables|Default|GetFuryFX)))

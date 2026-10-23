@@ -1,0 +1,11 @@
+(fn RegenTick ()
+  (Variables|Default|SetBuffLeft (- (Variables|Default|GetRegenEnd) (Utilities|Time|GetGameTimeinSeconds)))
+  (if (or (< (Variables|Default|GetBuffLeft) 0.0) (Class|BPHealthComponent|GetIsDead (Variables|Default|GetHealthComponent)))
+    (Variables|Default|SetRegenActive false)
+    (Rendering|SetVisibility (Variables|Default|GetRegenLight) false)
+    (CallFunction|RegenFXOff self)
+    (Utilities|Time|ClearTimerbyFunctionName :Object self :FunctionName "RegenTick")
+    (Development|PrintString :InString "Regeneration ends" :bPrintToScreen true :bPrintToLog false :TextColor "(R=0.300000,G=0.700000,B=0.400000,A=1.000000)" :Duration 1.5 :Key "Regen")
+    (else
+      (Class|BPHealthComponent|Heal (Variables|Default|GetHealthComponent) (Variables|Default|GetRegenPerTick))
+      (Development|PrintString :InString (Utilities|String|Append "REGEN  +health   " (Utilities|String|ToString(Integer) (Math|Float|Ceil (Variables|Default|GetBuffLeft)))) :bPrintToScreen true :bPrintToLog false :TextColor "(R=0.300000,G=1.000000,B=0.400000,A=1.000000)" :Duration 0.6 :Key "Regen"))))

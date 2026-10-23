@@ -1,0 +1,11 @@
+(fn Hit (Reach AnyDir DmgFrac Push Up Mode Fx)
+  (bind loc (Transformation|GetActorLocation (Components|GetOwner self)))
+  (if (== Fx 1)
+    (Niagara|SpawnSystematLocation :SystemTemplate "/Game/Timeshift/Hazards/VFX/NS_RockDust.NS_RockDust" :Location loc :Scale (Math|Vector|MakeVector 2.5 2.5 2.5))
+    (Audio|PlaySoundatLocation :Sound "/Game/Timeshift/Audio/SFX/Creatures/S_RexPrime_Step_02.S_RexPrime_Step_02" :Location loc :VolumeMultiplier 1.3 :PitchMultiplier 0.8))
+  (if (== Fx 2)
+    (Audio|PlaySoundatLocation :Sound "/Game/Timeshift/Audio/SFX/Creatures/S_Fly_Dive_Whoosh.S_Fly_Dive_Whoosh" :Location loc :VolumeMultiplier 0.7 :PitchMultiplier 1.3))
+  (if (Variables|Default|GetIsHero)
+    (CallFunction|HeroHit self Reach AnyDir DmgFrac Push Up Mode)
+    (else
+      (CallFunction|EnemyHit self Reach AnyDir DmgFrac Push Up Mode))))

@@ -1,0 +1,10 @@
+(fn LoadDifficulty ()
+  ; the hero's copy: read the saved level once (the settings save; missing = medium)
+  (if (not (Variables|Default|GetDiffLoaded))
+    (Variables|Default|SetDiffLoaded true)
+    (Variables|Default|SetDifficulty 1)
+    (if (SaveGame|DoesSaveGameExist "ChronoshiftSettings" 0)
+      (bind sv (Utilities|Casting|CastToBP_SettingsSave :Object (SaveGame|LoadGamefromSlot "ChronoshiftSettings" 0))
+        (:then
+          (Variables|Default|SetDifficulty (Class|BPSettingsSave|GetDifficulty sv)))
+        (:CastFailed)))))

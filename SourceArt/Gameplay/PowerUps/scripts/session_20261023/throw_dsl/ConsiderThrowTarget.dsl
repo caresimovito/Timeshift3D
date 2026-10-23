@@ -1,0 +1,7 @@
+(fn ConsiderThrowTarget (E)
+  (bind to (- (Transformation|GetActorLocation E) (Transformation|GetActorLocation self)))
+  (bind dist (Math|Vector|VectorLength to))
+  (bind facing (/ (Math|Vector|DotProduct (Transformation|GetActorForwardVector self) to) (Math|Float|Max(Float) dist 1.0)))
+  (if (and (> facing 0.85) (< dist (Variables|Default|GetThrowTargetScore)))
+    (Variables|Default|SetThrowTarget E)
+    (Variables|Default|SetThrowTargetScore dist)))

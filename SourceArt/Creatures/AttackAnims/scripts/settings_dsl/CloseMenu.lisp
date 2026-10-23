@@ -1,0 +1,8 @@
+(fn CloseMenu ()
+  (bind pc (Game|GetPlayerController 0))
+  (Widget|SetVisibility (Variables|WBP_Settings|GetDim) "Collapsed")
+  (Widget|SetVisibility (Variables|WBP_Settings|GetPanel) "Collapsed")
+  (Game|SetGamePaused false)
+  (Input|SetInputModeGameOnly pc false)
+  (Class|PlayerController|SetShowMouseCursor :self pc :bShowMouseCursor false)
+  (Variables|Default|SetOpen false))

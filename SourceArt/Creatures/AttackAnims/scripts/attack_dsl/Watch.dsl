@@ -17,5 +17,8 @@
     (if (> (Variables|Default|GetPick) 0)
       (Variables|Default|SetMoveLen (CallFunction|PlayMove self (Class|BPEnemyBase|GetBody Enemy) sp (Variables|Default|GetPick)))
       (if (> (Variables|Default|GetMoveLen) 0.0)
-        (Class|BPEnemyBase|SetAttackEndTime :self Enemy :AttackEndTime (+ (Utilities|Time|GetGameTimeinSeconds) (Variables|Default|GetMoveLen))))))
+        (Class|BPEnemyBase|SetAttackEndTime :self Enemy :AttackEndTime (+ (Utilities|Time|GetGameTimeinSeconds) (Variables|Default|GetMoveLen)))
+        ; its next attack waits for the move to finish: UpdateBodyAnim never holds an attack, so a cooldown shorter than the
+        ; move (Raptor 0.8 s vs Frenzy 1.0 s) would bite over it and cut its last hits off
+        (Utilities|Time|SetTimerbyFunctionName :Object Enemy :FunctionName "ResetAttackCooldown" :Time (Math|Float|Max(Float) (Class|BPEnemyBase|GetAttackCooldown Enemy) (+ (Variables|Default|GetMoveLen) 0.2)) :bLooping false))))
   (Variables|Default|SetLastState st))

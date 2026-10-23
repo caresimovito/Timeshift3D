@@ -1,0 +1,7 @@
+(fn HideHeldWeapons ()
+  (Rendering|SetVisibility (Variables|Default|GetSpearMeshComponent) false)
+  (Rendering|SetVisibility (Variables|Default|GetClubMeshComponent) false)
+  (if (Variables|Default|GetHasTorch)
+    (Rendering|SetVisibility (Variables|Default|GetTorchMeshComponent) false)
+    (Rendering|SetVisibility (Variables|Default|GetTorchLightComponent) false)
+    (Rendering|SetVisibility (Variables|Default|GetTorchFlameComponent) false)))

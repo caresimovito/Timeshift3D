@@ -1,0 +1,7 @@
+(fn EndHide ()
+  (if (Variables|Default|GetHiding)
+    (Variables|Default|SetHiding false)
+    (for a (Actor|GetAllActorsOfClass :ActorClass "/Game/Timeshift/Enemies/BP_EnemyBase.BP_EnemyBase_C")
+      (CallFunction|RestoreEnemy self a))
+    (CallFunction|HideFXOff self)
+    (Development|PrintString :InString "You are visible again" :bPrintToScreen true :bPrintToLog true :TextColor "(R=0.900000,G=0.600000,B=0.300000,A=1.000000)" :Duration 2.0 :Key "Hide")))

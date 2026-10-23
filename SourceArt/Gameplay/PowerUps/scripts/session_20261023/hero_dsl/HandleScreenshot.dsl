@@ -1,0 +1,12 @@
+(fn HandleScreenshot ()
+  ; F12: screenshot to Timeshift3D/Screenshots. The file name carries the player's position (Shot_<time>_at_<x>_<y>.png) so a
+  ; screenshot of a problem says where it is (2026-10-22)
+  (bind pc (Game|GetPlayerController 0))
+  (bind down (Game|Player|IsInputKeyDown pc "F12"))
+  (if (and down (not (Variables|Default|GetScreenshotPressed)))
+    (bind l (Transformation|GetActorLocation self))
+    (bind pos (Utilities|String|Append (Utilities|String|Append (Utilities|String|ToString(Integer) (Math|Float|Round (.x l))) "_") (Utilities|String|ToString(Integer) (Math|Float|Round (.y l)))))
+    (Development|ExecuteConsoleCommand :Command (Utilities|String|Append "HighResShot 1 filename=\"C:/repos/Unreal Projects/Timeshift3D/Screenshots/Shot_" (Utilities|String|Append (Utilities|String|ToString(Integer64) (Math|DateTime|ToUnixTimestamp (Math|DateTime|Now))) (Utilities|String|Append "_at_" (Utilities|String|Append pos "\"")))))
+    (Development|PrintString :InString (Utilities|String|Append "Screenshot saved (position " (Utilities|String|Append pos ")")) :bPrintToScreen true :bPrintToLog true :TextColor "(R=0.000000,G=0.660000,B=1.000000,A=1.000000)" :Duration 1.5))
+  (Variables|Default|SetScreenshotPressed down)
+  (CallFunction|HandleCrouch self))

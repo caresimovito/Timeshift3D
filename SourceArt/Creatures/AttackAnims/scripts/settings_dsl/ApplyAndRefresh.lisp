@@ -1,0 +1,5 @@
+(fn ApplyAndRefresh ()
+  (bind g (Settings|GetGameUserSettings))
+  (Settings|ApplySettings g false)
+  (Settings|SaveSettings g)
+  (CallFunction|RefreshStatus self))

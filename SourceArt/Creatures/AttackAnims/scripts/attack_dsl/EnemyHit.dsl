@@ -1,0 +1,16 @@
+(fn EnemyHit (Reach AnyDir DmgFrac Push Up Mode)
+  ; an enemy's move connects with the player if he is still within reach (and in front, unless it hits all round)
+  (bind en (Variables|Default|GetOwnerEnemy))
+  (bind pl (Game|GetPlayerCharacter 0))
+  (if (and (< (Transformation|GetHorizontalDistanceTo :self en :OtherActor pl) (* Reach (Class|BPEnemyBase|GetAttackRange en))) (or AnyDir (> (Transformation|GetHorizontalDotProductTo :self en :OtherActor pl) 0.3)))
+    (bind hero (Utilities|Casting|CastToBP_ThirdPersonCharacter :Object pl)
+      (:then
+        (Class|BPHealthComponent|ApplyDamage :self (Class|BPThirdPersonCharacter|GetHealthComponent hero) :DamageAmount (* DmgFrac (Class|BPEnemyBase|GetAttackDamage en)))
+        ; the shove scales with the attacker (attack damage / 25, 0.2..1): a Compy nudges, a Triceratops throws. No launch while
+        ; the player is already in the air, or a swarm of small ones juggles him (seen 2026-10-21 in a Compy swarm)
+        (if (not (Movement|IsFalling (Class|Character|GetCharacterMovement hero)))
+          (bind k (Math|Float|Clamp(Float) (/ (Class|BPEnemyBase|GetAttackDamage en) 25.0) 0.2 1.0))
+          (CallFunction|SetPush self en hero Mode)
+          (bind pd (Variables|Default|GetPushDir))
+          (Character|LaunchCharacter :self hero :LaunchVelocity (Math|Vector|MakeVector (* (.x pd) (* Push k)) (* (.y pd) (* Push k)) (* Up (* k k))) :bXYOverride true :bZOverride (> (* Up (* k k)) 50.0))))
+      (:CastFailed))))

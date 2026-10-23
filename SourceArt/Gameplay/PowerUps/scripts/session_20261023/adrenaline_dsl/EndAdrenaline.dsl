@@ -1,0 +1,6 @@
+(fn EndAdrenaline ()
+  (Variables|Default|SetBaseWalkSpeed 500.0)
+  (Variables|Default|SetAdrenaline false)
+  (Class|CharacterMovementComponent|SetMaxWalkSpeed 500.0 (Variables|Character|GetCharacterMovement))
+  (CallFunction|AdrenalineFXOff self)
+  (Development|PrintString :InString "Adrenaline fades" :bPrintToScreen true :bPrintToLog true :TextColor "(R=0.700000,G=0.600000,B=0.200000,A=1.000000)" :Duration 2.0))

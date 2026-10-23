@@ -1,0 +1,11 @@
+(fn QuickBola ()
+  (if (and (not (Variables|Default|GetMorphed)) (and (not (Variables|Default|GetIsRangedAttacking)) (> (Variables|Default|GetBolaCount) 0)))
+    (Variables|Default|SetThrowingBola true)
+    (if (Variables|Default|GetIsAiming)
+      (CallFunction|AimAtCrosshair self)
+      (else
+        (Variables|Default|SetAimedThrow false)
+        (bind cr (Transformation|GetWorldRotation (Variables|Components|GetFollowCamera)))
+        (Transformation|SetActorRotation self (Math|Rotator|MakeRotator :Roll 0.0 :Pitch 0.0 :Yaw (.yaw cr)) false)
+        (CallFunction|PickThrowTarget self)))
+    (CallFunction|ThrowStone self)))

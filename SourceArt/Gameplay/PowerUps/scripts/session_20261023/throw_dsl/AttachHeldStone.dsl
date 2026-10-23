@@ -1,0 +1,16 @@
+(fn AttachHeldStone ()
+  (bind hs (Variables|Default|GetHeldStoneComponent))
+  (if (Variables|Default|GetThrowLeft)
+    (Transformation|AttachComponentToComponent hs (Variables|Character|GetMesh) "hand_l" :LocationRule "SnapToTarget" :RotationRule "SnapToTarget" :ScaleRule "KeepRelative")
+    (Transformation|SetRelativeLocation hs (Math|Vector|MakeVector 8.0 -6.0 0.0))
+    (else
+      (Transformation|AttachComponentToComponent hs (Variables|Character|GetMesh) "grip_r" :LocationRule "SnapToTarget" :RotationRule "SnapToTarget" :ScaleRule "KeepRelative")))
+  (if (Variables|Default|GetThrowingBola)
+    ; bola held by the knot, hanging (the mesh lies flat, so stand it up)
+    (Components|StaticMesh|SetStaticMesh hs "/Game/Timeshift/Weapons/Meshes/SM_Bola.SM_Bola")
+    (Transformation|SetRelativeScale3D hs (Math|Vector|MakeVector 1.0 1.0 1.0))
+    (Transformation|SetRelativeRotation hs (Math|Rotator|MakeRotator :Roll 0.0 :Pitch 90.0 :Yaw 0.0))
+    (else
+      (Components|StaticMesh|SetStaticMesh hs "/Game/Timeshift/Environment/Meshes/RiverBoulder/SM_RiverBoulder_01.SM_RiverBoulder_01")
+      (Transformation|SetRelativeScale3D hs (Math|Vector|MakeVector 0.06 0.06 0.06))))
+  (Rendering|SetVisibility hs true))
