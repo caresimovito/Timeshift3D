@@ -41,3 +41,6 @@ Screenshots/*
 # Raw third-party downloads and their regenerable prep output (re-download / re-run prep scripts)
 SourceArt/Environment/Arena/dl_*/
 SourceArt/Environment/Arena/prep/
+
+# Trailer production (render frames, videos, voice-over) - large, kept out of the repo
+/Trailer/
